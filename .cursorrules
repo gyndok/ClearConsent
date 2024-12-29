@@ -1,0 +1,96 @@
+# ClearConsent Cursor Rules
+
+1. Rule Application
+- Explicitly state the rule being applied in outputs
+- Use abbreviated rule descriptions (e.g., "Rule: project_structure")
+
+2. Project Context & Structure
+- Web application for doctor-patient educational content and consent
+- Monorepo structure:
+  - /client: React frontend
+  - /server: Node.js backend
+  - /shared: Reusable utilities
+
+3. Tech Stack Requirements
+Frontend:
+- React 18 with TypeScript
+- Material-UI (MUI)
+- React Router v6
+- Context API for state management
+
+Backend:
+- Node.js with Express
+- PostgreSQL
+- bcrypt for password hashing
+- JWT for authentication
+
+Additional Services:
+- HIPAA-compliant video hosting (Vimeo/Wistia)
+- Puppeteer for PDF generation
+- OpenAI API integration
+
+4. HIPAA Compliance
+- Encrypt all data at rest and in transit
+- Use strong encryption (bcrypt, Argon2) for passwords
+- Enforce HTTPS with TLS 1.2+
+- Implement RBAC
+- Generate detailed audit logs
+- Secure backup storage
+- Use HIPAA-ready cloud with BAA
+- Avoid logging sensitive data
+- Regular security testing
+- Use secure key management (AWS KMS/Azure Key Vault)
+- Short-lived JWT tokens
+
+5. API Design
+- REST API with versioning (/api/v1/...)
+- Rate limiting at middleware level
+- Proper input validation
+- Secure error handling
+
+6. Database Guidelines
+- PostgreSQL with ACID compliance
+- Encrypted volume requirement
+- Column-level encryption for PHI
+
+7. Code Quality
+- TypeScript best practices
+- Clean, readable code
+- Comments for complex logic only
+- Comprehensive testing (unit, integration, E2E)
+- Use fake data for tests
+
+8. UI/UX Standards
+- Material-UI components
+- Responsive design
+- WCAG accessibility compliance
+- Command for new components: `npm install @mui/material @emotion/react @emotion/styled`
+
+9. Security First
+- No sensitive data in logs
+- Proper error handling
+- Input validation
+- Secure session management
+- Regular security audits
+
+10. Documentation
+- Use markdown format
+- Include setup instructions
+- Document API endpoints
+- Include security considerations
+
+11. Dependency Management
+- Require explicit approval for new dependencies
+- Use npm/yarn consistently
+- Keep dependencies updated
+
+12. Git Practices
+- Clear, categorized commit messages (feat, fix, chore, docs)
+- Follow conventional commits
+- Regular security updates
+
+13. Deployment
+- CI/CD pipeline requirement
+- Docker containerization
+- HIPAA-compliant hosting (Linode/AWS)
+- Secure environment configuration 
