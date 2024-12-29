@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface User {
   firstName: string;
@@ -47,8 +46,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    // Clear authentication state
     setIsAuthenticated(false);
     setUser(null);
+    
+    // Clear stored data
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
+    sessionStorage.clear(); // Clear any session data
   };
 
   return (

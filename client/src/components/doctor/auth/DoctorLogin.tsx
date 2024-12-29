@@ -29,7 +29,7 @@ export const DoctorLogin: React.FC = () => {
     try {
       await login(email, password);
       navigate('/doctor/dashboard');
-    } catch (err) {
+    } catch (error) {
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);
