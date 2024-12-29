@@ -30,6 +30,7 @@ yarn-error.log*
 
 # OS
 .DS_Store
+Thumbs.db
 .env.local
 .env.development.local
 .env.test.local
@@ -42,4 +43,9 @@ yarn-error.log*
 .npm
 
 # Optional eslint cache
-.eslintcache 
+.eslintcache
+
+# Mac specific
+.DS_Store
+.AppleDouble
+.LSOverride
