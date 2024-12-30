@@ -1,0 +1,58 @@
+{
+  "procedures": [
+    {
+      "id": "1",
+      "title": "Dental Cleaning",
+      "type": "Preventive",
+      "description": "Regular dental cleaning and examination",
+      "documentUrl": "https://example.com/dental-cleaning.pdf",
+      "videoUrl": "https://www.youtube.com/watch?v=example1",
+      "lastUsed": "2024-01-15T08:30:00Z",
+      "status": "Active",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-15T08:30:00Z",
+      "requiredFields": ["allergies", "lastDentalVisit"],
+      "educationalContent": {
+        "risks": "Minimal risks include temporary sensitivity",
+        "benefits": "Prevents cavities and gum disease",
+        "alternatives": "No viable alternatives to professional cleaning"
+      }
+    },
+    {
+      "id": "2",
+      "title": "Root Canal",
+      "type": "Endodontic",
+      "description": "Root canal treatment for infected tooth",
+      "documentUrl": "https://example.com/root-canal.pdf",
+      "videoUrl": "https://www.youtube.com/watch?v=example2",
+      "lastUsed": "2024-01-10T14:20:00Z",
+      "status": "Active",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-10T14:20:00Z",
+      "requiredFields": ["allergies", "medications", "medicalHistory"],
+      "educationalContent": {
+        "risks": "Possible infection, tooth fracture",
+        "benefits": "Saves natural tooth, eliminates pain",
+        "alternatives": "Tooth extraction"
+      }
+    },
+    {
+      "id": "3",
+      "title": "Wisdom Teeth Extraction",
+      "type": "Surgical",
+      "description": "Removal of impacted wisdom teeth",
+      "documentUrl": "https://example.com/wisdom-teeth.pdf",
+      "videoUrl": "https://www.youtube.com/watch?v=example3",
+      "lastUsed": "2024-01-05T11:15:00Z",
+      "status": "Active",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-05T11:15:00Z",
+      "requiredFields": ["allergies", "medications", "medicalHistory", "lastMeal"],
+      "educationalContent": {
+        "risks": "Swelling, infection, nerve damage",
+        "benefits": "Prevents crowding and future complications",
+        "alternatives": "Monitor if not impacted"
+      }
+    }
+  ]
+} 

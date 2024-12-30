@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { DoctorHeader } from '../../shared/DoctorHeader';
 import { AddPatientModal, PatientData } from '../patients/AddPatientModal';
+import { ProceduresAPI, PatientsAPI } from '../../../services/mockDb';
 
 interface Patient extends PatientData {
   id: string;
@@ -35,7 +36,7 @@ interface Patient extends PatientData {
 }
 
 interface Procedure {
-  id: number;
+  id: string;
   name: string;
   type: string;
   lastUsed: string;
@@ -47,40 +48,46 @@ export const DoctorDashboard: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
   const [procedureSearchTerm, setProcedureSearchTerm] = useState('');
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [procedures, setProcedures] = useState<Procedure[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock data
-  const [patients, setPatients] = useState<Patient[]>([
-    {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Smith',
-      email: 'john.smith@example.com',
-      phone: '(555) 123-4567',
-      dateOfBirth: '1980-01-01',
-      status: 'Pending',
-      lastUpdated: '2024-01-01',
-    },
-  ]);
-
-  const [procedures] = useState<Procedure[]>([
-    { id: 1, name: 'General Consent Form', type: 'General', lastUsed: '2024-02-15' },
-    { id: 2, name: 'Surgery Consent', type: 'Surgical', lastUsed: '2024-02-14' },
-  ]);
-
-  const handleAddPatient = async (patientData: PatientData) => {
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Create new patient with generated ID and additional fields
-    const newPatient: Patient = {
-      ...patientData,
-      id: (patients.length + 1).toString(),
-      status: 'Pending',
-      lastUpdated: new Date().toISOString().split('T')[0],
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [patientsData, proceduresData] = await Promise.all([
+          PatientsAPI.getAll(),
+          ProceduresAPI.getAll()
+        ]);
+        
+        setPatients(patientsData);
+        setProcedures(proceduresData.map(p => ({
+          ...p,
+          name: p.title // Map title to name for compatibility
+        })));
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setPatients(prev => [...prev, newPatient]);
-    setShowSuccess(true);
+    loadData();
+  }, []);
+
+  const handleAddPatient = async (patientData: PatientData) => {
+    try {
+      const newPatient = await PatientsAPI.create({
+        ...patientData,
+        status: 'Pending'
+      });
+      
+      setPatients(prev => [...prev, newPatient]);
+      setShowSuccess(true);
+      setIsAddPatientModalOpen(false);
+    } catch (error) {
+      console.error('Error adding patient:', error);
+    }
   };
 
   const filteredPatients = patients.filter(patient =>
@@ -101,9 +108,22 @@ export const DoctorDashboard: React.FC = () => {
     navigate('/doctor/procedures/new');
   };
 
-  const handleEditProcedure = (procedureId: number) => {
+  const handleEditProcedure = (procedureId: string) => {
     navigate(`/doctor/procedures/${procedureId}/edit`);
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -177,7 +197,7 @@ export const DoctorDashboard: React.FC = () => {
                         <TableCell>{patient.email}</TableCell>
                         <TableCell>{patient.phone}</TableCell>
                         <TableCell>{patient.status}</TableCell>
-                        <TableCell>{patient.lastUpdated}</TableCell>
+                        <TableCell>{new Date(patient.lastUpdated).toLocaleDateString()}</TableCell>
                         <TableCell align="right">
                           <IconButton
                             size="small"
@@ -235,7 +255,7 @@ export const DoctorDashboard: React.FC = () => {
                     <TableRow key={procedure.id}>
                       <TableCell>{procedure.name}</TableCell>
                       <TableCell>{procedure.type}</TableCell>
-                      <TableCell>{procedure.lastUsed}</TableCell>
+                      <TableCell>{new Date(procedure.lastUsed).toLocaleDateString()}</TableCell>
                       <TableCell align="right">
                         <IconButton 
                           size="small"

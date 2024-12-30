@@ -1,0 +1,106 @@
+{
+  "doctors": [
+    {
+      "id": "1",
+      "firstName": "Michael",
+      "lastName": "Chen",
+      "email": "dr.chen@example.com",
+      "phone": "555-0101",
+      "speciality": "General Dentist",
+      "licenseNumber": "DDS123456",
+      "npi": "1234567890",
+      "status": "Active",
+      "lastLogin": "2024-01-15T08:00:00Z",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-15T08:00:00Z",
+      "auth": {
+        "username": "drchen",
+        "password": "Chen2024!",
+        "role": "doctor"
+      },
+      "patientIds": ["1", "4", "5"],
+      "preferences": {
+        "language": "en",
+        "notificationMethod": "email",
+        "autoAssignConsent": true,
+        "defaultProcedures": ["1", "2"]
+      },
+      "practiceInfo": {
+        "practiceName": "Bright Smile Dental",
+        "address": "123 Medical Center Dr",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94123",
+        "website": "https://brightsmile.example.com"
+      }
+    },
+    {
+      "id": "2",
+      "firstName": "Sarah",
+      "lastName": "Martinez",
+      "email": "dr.martinez@example.com",
+      "phone": "555-0102",
+      "speciality": "Oral Surgeon",
+      "licenseNumber": "DDS789012",
+      "npi": "9876543210",
+      "status": "Active",
+      "lastLogin": "2024-01-14T15:30:00Z",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-14T15:30:00Z",
+      "auth": {
+        "username": "drmartinez",
+        "password": "Martinez2024!",
+        "role": "doctor"
+      },
+      "patientIds": ["2", "6", "7"],
+      "preferences": {
+        "language": "es",
+        "notificationMethod": "sms",
+        "autoAssignConsent": false,
+        "defaultProcedures": ["3"]
+      },
+      "practiceInfo": {
+        "practiceName": "Advanced Dental Surgery",
+        "address": "456 Healthcare Ave",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94124",
+        "website": "https://advanceddental.example.com"
+      }
+    },
+    {
+      "id": "3",
+      "firstName": "David",
+      "lastName": "Wilson",
+      "email": "dr.wilson@example.com",
+      "phone": "555-0103",
+      "speciality": "Endodontist",
+      "licenseNumber": "DDS345678",
+      "npi": "5678901234",
+      "status": "Inactive",
+      "lastLogin": "2024-01-10T09:15:00Z",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-10T09:15:00Z",
+      "auth": {
+        "username": "drwilson",
+        "password": "Wilson2024!",
+        "role": "doctor"
+      },
+      "patientIds": ["3", "8", "9"],
+      "preferences": {
+        "language": "en",
+        "notificationMethod": "email",
+        "autoAssignConsent": true,
+        "defaultProcedures": ["2"]
+      },
+      "practiceInfo": {
+        "practiceName": "Root Canal Specialists",
+        "address": "789 Dental Lane",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94125",
+        "website": "https://rootcanal.example.com"
+      }
+    }
+  ]
+} 
