@@ -14,7 +14,7 @@
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-15T08:00:00Z",
       "auth": {
-        "username": "drchen",
+        "username": "dr.chen@example.com",
         "password": "Chen2024!",
         "role": "doctor"
       },
@@ -48,7 +48,7 @@
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-14T15:30:00Z",
       "auth": {
-        "username": "drmartinez",
+        "username": "dr.martinez@example.com",
         "password": "Martinez2024!",
         "role": "doctor"
       },
@@ -82,7 +82,7 @@
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-10T09:15:00Z",
       "auth": {
-        "username": "drwilson",
+        "username": "dr.wilson@example.com",
         "password": "Wilson2024!",
         "role": "doctor"
       },
