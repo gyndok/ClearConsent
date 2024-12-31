@@ -27,17 +27,20 @@ A modern patient consent management system for healthcare providers.
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/clearconsent.git
 cd clearconsent/client
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm start
 ```
@@ -51,6 +54,7 @@ The application will be available at `http://localhost:3000`.
 For development testing, you can use any email/password combination to log in. The system currently uses mock authentication that will create a test doctor account.
 
 Example credentials:
+
 - Email: test@example.com
 - Password: password123
 
@@ -77,9 +81,13 @@ src/
 ## Contributing
 
 1. Fork the repository
+
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+
 4. Push to the branch (`git push origin feature/AmazingFeature`)
+
 5. Open a Pull Request
 
 ## License
