@@ -26,11 +26,11 @@ import {
 
 interface Message {
   id: string;
+  conversationId: string;
   senderId: string;
   senderName: string;
   content: string;
   timestamp: string;
-  isRead: boolean;
 }
 
 interface Conversation {
@@ -96,27 +96,27 @@ export const DoctorMessages: React.FC = () => {
         const mockMessages: Message[] = [
           {
             id: '1',
+            conversationId: '1',
             senderId: 'patient',
             senderName: 'John Smith',
             content: 'I have a question about my medication.',
             timestamp: '2024-01-20T14:00:00Z',
-            isRead: true,
           },
           {
             id: '2',
+            conversationId: '1',
             senderId: 'doctor',
-            senderName: 'You',
+            senderName: 'Dr. Smith',
             content: 'Of course, what would you like to know?',
             timestamp: '2024-01-20T14:15:00Z',
-            isRead: true,
           },
           {
             id: '3',
+            conversationId: '1',
             senderId: 'patient',
             senderName: 'John Smith',
             content: 'Should I take it with food or on an empty stomach?',
             timestamp: '2024-01-20T14:30:00Z',
-            isRead: false,
           },
         ];
 
@@ -133,23 +133,30 @@ export const DoctorMessages: React.FC = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!selectedConversation || !newMessage.trim()) {
+      return;
+    }
 
-    const message: Message = {
-      id: Date.now().toString(),
-      senderId: 'doctor',
-      senderName: 'You',
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      isRead: true,
-    };
+    try {
+      // Mock sending message
+      const message: Message = {
+        id: String(messages.length + 1),
+        conversationId: selectedConversation,
+        content: newMessage.trim(),
+        senderId: 'doctor',
+        senderName: 'Dr. Smith',
+        timestamp: new Date().toISOString(),
+      };
 
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
-    scrollToBottom();
-
-    // Mock API call to send message
-    await new Promise(resolve => setTimeout(resolve, 500));
+      setMessages([...messages, message]);
+      setNewMessage('');
+      
+      // Scroll to bottom after message is sent
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      // You could add a Snackbar or Alert here to show the error to the user
+    }
   };
 
   const formatTimestamp = (timestamp: string) => {

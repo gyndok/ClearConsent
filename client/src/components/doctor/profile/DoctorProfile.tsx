@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import { PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
-import { DoctorHeader } from '../../shared/DoctorHeader';
 import { useAuth } from '../../../contexts/AuthContext';
 
 interface DoctorProfileData {
@@ -38,7 +37,7 @@ interface DoctorProfileData {
   avatarUrl?: string;
 }
 
-const DoctorProfile: React.FC = () => {
+export const DoctorProfile: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -138,7 +137,6 @@ const DoctorProfile: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DoctorHeader />
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Paper elevation={3} sx={{ p: 4 }}>
           <Box component="form" onSubmit={handleSubmit}>
@@ -372,6 +370,4 @@ const DoctorProfile: React.FC = () => {
       </Snackbar>
     </Box>
   );
-};
-
-export default DoctorProfile; 
+}; 

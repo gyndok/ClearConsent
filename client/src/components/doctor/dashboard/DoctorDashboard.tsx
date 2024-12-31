@@ -18,33 +18,30 @@ import {
   IconButton,
   Link,
   Grid,
+  LinearProgress,
+  Chip,
+  Stack,
+  Tooltip,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Search as SearchIcon,
   Visibility as ViewIcon,
+  Edit as EditIcon,
+  VideoLibrary,
+  PictureAsPdf,
 } from '@mui/icons-material';
-import { AddPatientModal, PatientData } from '../patients/AddPatientModal';
-import { ProceduresAPI, PatientsAPI } from '../../../services/mockDb';
-
-interface Patient extends PatientData {
-  id: string;
-  status: string;
-  lastUpdated: string;
-}
-
-interface Procedure {
-  id: string;
-  name: string;
-  type: string;
-  lastUsed: string;
-}
+import { AddPatientModal } from '../patients/AddPatientModal';
+import { AddProcedureModal } from '../procedures/AddProcedureModal';
+import { PatientsAPI, ProceduresAPI } from '../../../services/mockDb';
+import type { Patient, Procedure } from '../../../services/mockDb';
 
 export const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [isAddProcedureModalOpen, setIsAddProcedureModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
   const [procedureSearchTerm, setProcedureSearchTerm] = useState('');
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -58,12 +55,8 @@ export const DoctorDashboard: React.FC = () => {
           PatientsAPI.getAll(),
           ProceduresAPI.getAll()
         ]);
-        
         setPatients(patientsData);
-        setProcedures(proceduresData.map(p => ({
-          ...p,
-          name: p.title // Map title to name for compatibility
-        })));
+        setProcedures(proceduresData);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -74,19 +67,32 @@ export const DoctorDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  const handleAddPatient = async (patientData: PatientData) => {
+  const handleAddPatient = async (patientData: Omit<Patient, 'id' | 'lastUpdated' | 'assignments'>) => {
     try {
-      const newPatient = await PatientsAPI.create({
-        ...patientData,
-        status: 'Pending'
-      });
-      
+      const newPatient = await PatientsAPI.create(patientData);
       setPatients(prev => [...prev, newPatient]);
+      setSuccessMessage('Patient added successfully!');
       setShowSuccess(true);
       setIsAddPatientModalOpen(false);
     } catch (error) {
       console.error('Error adding patient:', error);
     }
+  };
+
+  const handleAddProcedure = async (procedureData: Omit<Procedure, 'id' | 'lastUsed'>) => {
+    try {
+      const newProcedure = await ProceduresAPI.create(procedureData);
+      setProcedures(prev => [...prev, newProcedure]);
+      setSuccessMessage('Procedure added successfully!');
+      setShowSuccess(true);
+      setIsAddProcedureModalOpen(false);
+    } catch (error) {
+      console.error('Error adding procedure:', error);
+    }
+  };
+
+  const handleEditProcedure = (procedureId: string) => {
+    navigate(`/doctor/procedures/${procedureId}/edit`);
   };
 
   const filteredPatients = patients.filter(patient =>
@@ -95,20 +101,12 @@ export const DoctorDashboard: React.FC = () => {
   );
 
   const filteredProcedures = procedures.filter(procedure =>
-    procedure.name.toLowerCase().includes(procedureSearchTerm.toLowerCase()) ||
+    procedure.title.toLowerCase().includes(procedureSearchTerm.toLowerCase()) ||
     procedure.type.toLowerCase().includes(procedureSearchTerm.toLowerCase())
   );
 
   const handleViewPatient = (patientId: string) => {
     navigate(`/doctor/patients/${patientId}`);
-  };
-
-  const handleAddProcedure = () => {
-    navigate('/doctor/procedures/new');
-  };
-
-  const handleEditProcedure = (procedureId: string) => {
-    navigate(`/doctor/procedures/${procedureId}/edit`);
   };
 
   if (isLoading) {
@@ -170,8 +168,9 @@ export const DoctorDashboard: React.FC = () => {
                       <TableCell>Name</TableCell>
                       <TableCell>Email</TableCell>
                       <TableCell>Phone</TableCell>
+                      <TableCell>Current Assignment</TableCell>
+                      <TableCell>Progress</TableCell>
                       <TableCell>Status</TableCell>
-                      <TableCell>Last Updated</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -194,8 +193,28 @@ export const DoctorDashboard: React.FC = () => {
                         </TableCell>
                         <TableCell>{patient.email}</TableCell>
                         <TableCell>{patient.phone}</TableCell>
-                        <TableCell>{patient.status}</TableCell>
-                        <TableCell>{new Date(patient.lastUpdated).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {patient.currentAssignment || 'No active assignment'}
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2">
+                              {`${patient.assignments.completed}/${patient.assignments.total}`}
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={(patient.assignments.completed / patient.assignments.total) * 100}
+                              sx={{ width: 100 }}
+                            />
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={patient.status}
+                            color={patient.status === 'Active' ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
                         <TableCell align="right">
                           <IconButton
                             size="small"
@@ -215,59 +234,96 @@ export const DoctorDashboard: React.FC = () => {
 
           {/* Procedures Section */}
           <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Frequently Used Procedures</Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddProcedure}
-              >
-                Add New Procedure
-              </Button>
-            </Box>
+            <Paper sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6">Procedures</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsAddProcedureModalOpen(true)}
+                >
+                  Add New Procedure
+                </Button>
+              </Box>
 
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search procedures by name or type..."
-              value={procedureSearchTerm}
-              onChange={(e) => setProcedureSearchTerm(e.target.value)}
-              sx={{ mb: 3 }}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
-              }}
-            />
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search procedures by name or type..."
+                value={procedureSearchTerm}
+                onChange={(e) => setProcedureSearchTerm(e.target.value)}
+                sx={{ mb: 3 }}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
+                }}
+              />
 
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Procedure Name</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Last Used</TableCell>
-                    <TableCell align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredProcedures.map((procedure) => (
-                    <TableRow key={procedure.id}>
-                      <TableCell>{procedure.name}</TableCell>
-                      <TableCell>{procedure.type}</TableCell>
-                      <TableCell>{new Date(procedure.lastUsed).toLocaleDateString()}</TableCell>
-                      <TableCell align="right">
-                        <IconButton 
-                          size="small"
-                          onClick={() => handleEditProcedure(procedure.id)}
-                          sx={{ color: 'primary.main' }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </TableCell>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Procedure Name</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Content</TableCell>
+                      <TableCell>Last Used</TableCell>
+                      <TableCell align="right">Actions</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {filteredProcedures.map((procedure) => (
+                      <TableRow key={procedure.id}>
+                        <TableCell>{procedure.title}</TableCell>
+                        <TableCell>{procedure.type}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                            {procedure.description || 'No description available'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction="row" spacing={1}>
+                            {procedure.videoUrl && (
+                              <Tooltip title="View Video">
+                                <IconButton
+                                  size="small"
+                                  href={procedure.videoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <VideoLibrary fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {procedure.pdfUrl && (
+                              <Tooltip title="View PDF">
+                                <IconButton
+                                  size="small"
+                                  href={procedure.pdfUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <PictureAsPdf fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Stack>
+                        </TableCell>
+                        <TableCell>{new Date(procedure.lastUsed).toLocaleDateString()}</TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditProcedure(procedure.id)}
+                            sx={{ color: 'primary.main' }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           </Grid>
 
           {/* Add Patient Modal */}
@@ -276,6 +332,15 @@ export const DoctorDashboard: React.FC = () => {
               open={isAddPatientModalOpen}
               onClose={() => setIsAddPatientModalOpen(false)}
               onSubmit={handleAddPatient}
+            />
+          </Grid>
+
+          {/* Add Procedure Modal */}
+          <Grid item xs={12}>
+            <AddProcedureModal
+              open={isAddProcedureModalOpen}
+              onClose={() => setIsAddProcedureModalOpen(false)}
+              onSubmit={handleAddProcedure}
             />
           </Grid>
 
@@ -292,7 +357,7 @@ export const DoctorDashboard: React.FC = () => {
                 severity="success"
                 sx={{ width: '100%' }}
               >
-                Patient added successfully!
+                {successMessage}
               </Alert>
             </Snackbar>
           </Grid>

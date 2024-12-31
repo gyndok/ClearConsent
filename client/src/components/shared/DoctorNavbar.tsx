@@ -2,27 +2,29 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
+  Box,
   Toolbar,
   Typography,
-  Box,
   IconButton,
   Menu,
   MenuItem,
+  ListItemIcon,
+  ListItemText,
   Badge,
-  useTheme,
+  Divider,
 } from '@mui/material';
 import {
-  AccountCircle,
+  AccountCircle as AccountCircleIcon,
   Message as MessageIcon,
+  Settings as SettingsIcon,
+  ExitToApp as LogoutIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const DoctorNavbar: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const unreadMessages = 2; // This would come from a context or API call
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,55 +34,39 @@ export const DoctorNavbar: React.FC = () => {
     setAnchorEl(null);
   };
 
-  const handleMenuClick = (path: string) => {
-    handleClose();
-    if (path === '/logout') {
-      logout();
+  const handleLogout = async () => {
+    try {
+      await logout();
       navigate('/');
-    } else {
-      navigate(path);
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 
   return (
-    <AppBar 
-      position="static" 
-      color="default" 
-      elevation={0}
-      sx={{ 
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        backgroundColor: 'white',
-      }}
-    >
+    <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'divider' }}>
       <Toolbar>
         <Typography
           variant="h6"
           component="div"
-          sx={{ 
-            flexGrow: 1, 
-            color: theme.palette.primary.main,
-            cursor: 'pointer',
-          }}
+          sx={{ flexGrow: 1, cursor: 'pointer', color: 'primary.main', fontWeight: 600 }}
           onClick={() => navigate('/doctor/dashboard')}
         >
           ClearConsent
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton
-            color="inherit"
-            onClick={() => navigate('/doctor/messages')}
-          >
-            <Badge badgeContent={unreadMessages} color="error">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton color="inherit" onClick={() => navigate('/doctor/messages')}>
+            <Badge badgeContent={2} color="error">
               <MessageIcon />
             </Badge>
           </IconButton>
 
           <IconButton
-            color="inherit"
             onClick={handleMenu}
+            color="inherit"
           >
-            <AccountCircle />
+            <AccountCircleIcon />
           </IconButton>
 
           <Menu
@@ -98,14 +84,33 @@ export const DoctorNavbar: React.FC = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={() => handleMenuClick('/doctor/profile')}>
-              Profile
+            <MenuItem onClick={() => {
+              handleClose();
+              navigate('/doctor/profile');
+            }}>
+              <ListItemIcon>
+                <AccountCircleIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Profile</ListItemText>
             </MenuItem>
-            <MenuItem onClick={() => handleMenuClick('/doctor/settings')}>
-              Settings
+            <MenuItem onClick={() => {
+              handleClose();
+              navigate('/doctor/settings');
+            }}>
+              <ListItemIcon>
+                <SettingsIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Settings</ListItemText>
             </MenuItem>
-            <MenuItem onClick={() => handleMenuClick('/logout')}>
-              Logout
+            <Divider />
+            <MenuItem onClick={() => {
+              handleClose();
+              handleLogout();
+            }}>
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Logout</ListItemText>
             </MenuItem>
           </Menu>
         </Box>

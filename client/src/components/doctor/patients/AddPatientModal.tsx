@@ -4,209 +4,146 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
+  TextField,
   Grid,
-  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import type { Patient } from '../../../services/mockDb';
+
+type PatientFormData = Omit<Patient, 'id' | 'lastUpdated' | 'assignments'>;
 
 interface AddPatientModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (patientData: PatientData) => Promise<void>;
+  onSubmit: (data: PatientFormData) => Promise<void>;
 }
 
-export interface PatientData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-}
-
-export const AddPatientModal: React.FC<AddPatientModalProps> = ({
-  open,
-  onClose,
-  onSubmit,
-}) => {
-  const [formData, setFormData] = useState<PatientData>({
+export const AddPatientModal: React.FC<AddPatientModalProps> = ({ open, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<PatientFormData>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     dateOfBirth: '',
+    status: 'Active'
   });
 
-  const [errors, setErrors] = useState<Partial<PatientData>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validateForm = () => {
-    const newErrors: Partial<PatientData> = {};
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (field: keyof PatientData) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: undefined,
-      }));
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await onSubmit(formData);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        dateOfBirth: '',
-      });
-      onClose();
-    } catch (error) {
-      console.error('Error adding patient:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleClose = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSubmit(formData);
     setFormData({
       firstName: '',
       lastName: '',
       email: '',
       phone: '',
       dateOfBirth: '',
+      status: 'Active'
     });
-    setErrors({});
-    onClose();
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleStatusChange = (e: SelectChangeEvent) => {
+    setFormData(prev => ({
+      ...prev,
+      status: e.target.value
+    }));
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-    >
-      <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        Add New Patient
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+        <DialogTitle>Add New Patient</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={6}>
               <TextField
-                fullWidth
+                name="firstName"
                 label="First Name"
                 value={formData.firstName}
-                onChange={handleInputChange('firstName')}
-                error={!!errors.firstName}
-                helperText={errors.firstName}
+                onChange={handleTextChange}
+                fullWidth
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6}>
               <TextField
-                fullWidth
+                name="lastName"
                 label="Last Name"
                 value={formData.lastName}
-                onChange={handleInputChange('lastName')}
-                error={!!errors.lastName}
-                helperText={errors.lastName}
+                onChange={handleTextChange}
+                fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth
+                name="email"
                 label="Email"
                 type="email"
                 value={formData.email}
-                onChange={handleInputChange('email')}
-                error={!!errors.email}
-                helperText={errors.email}
+                onChange={handleTextChange}
+                fullWidth
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <TextField
-                fullWidth
-                label="Phone Number"
+                name="phone"
+                label="Phone"
                 value={formData.phone}
-                onChange={handleInputChange('phone')}
-                error={!!errors.phone}
-                helperText={errors.phone}
+                onChange={handleTextChange}
+                fullWidth
+                required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <TextField
-                fullWidth
+                name="dateOfBirth"
                 label="Date of Birth"
                 type="date"
                 value={formData.dateOfBirth}
-                onChange={handleInputChange('dateOfBirth')}
+                onChange={handleTextChange}
+                fullWidth
+                required
                 InputLabelProps={{
                   shrink: true,
                 }}
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleStatusChange}
+                  label="Status"
+                  required
+                >
+                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
-          <Button onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Adding...' : 'Add Patient'}
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" color="primary">
+            Add Patient
           </Button>
         </DialogActions>
       </form>

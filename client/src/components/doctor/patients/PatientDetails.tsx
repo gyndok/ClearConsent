@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -7,161 +7,192 @@ import {
   Paper,
   Grid,
   Button,
+  Stack,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
+  LinearProgress,
   IconButton,
-  Snackbar,
-  Alert,
+  Chip,
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
-  Add as AddIcon,
+  ArrowBack,
+  Edit as EditIcon,
+  Message as MessageIcon,
 } from '@mui/icons-material';
-import { DoctorHeader } from '../../shared/DoctorHeader';
+import { PatientsAPI } from '../../../services/mockDb';
+import type { Patient } from '../../../services/mockDb';
 
 export const PatientDetails: React.FC = () => {
-  const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
-  const [showSuccess, setShowSuccess] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock patient data - replace with API call
-  const patient = {
-    id: patientId,
-    firstName: 'John',
-    lastName: 'Smith',
-    email: 'john.smith@example.com',
-    phone: '(555) 123-4567',
-    dateOfBirth: '1980-01-01',
-    status: 'Pending',
-    lastUpdated: '2024-01-01',
-    assignedProcedures: [
-      { id: 1, name: 'General Consent Form', status: 'Pending', assignedDate: '2024-01-01' },
-      { id: 2, name: 'Surgery Consent', status: 'Completed', assignedDate: '2024-01-15' },
-    ],
-  };
+  useEffect(() => {
+    const loadPatient = async () => {
+      if (!id) return;
+      try {
+        const patientData = await PatientsAPI.getById(id);
+        if (patientData) {
+          setPatient(patientData);
+        }
+      } catch (error) {
+        console.error('Error loading patient:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleBack = () => {
-    navigate('/doctor/dashboard');
-  };
+    loadPatient();
+  }, [id]);
 
-  const handleAssignProcedure = () => {
-    // TODO: Implement procedure assignment
-    setShowSuccess(true);
-  };
+  if (isLoading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <Typography>Patient not found</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DoctorHeader />
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={handleBack} sx={{ color: 'primary.main' }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h5" component="h1">
-            Patient Details
-          </Typography>
-        </Box>
-
-        <Grid container spacing={3}>
-          {/* Patient Information */}
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: '100%' }}>
-              <Typography variant="h6" gutterBottom>
-                Personal Information
+        <Paper sx={{ p: 4 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <IconButton onClick={() => navigate('/doctor/dashboard')} sx={{ mr: 1 }}>
+                <ArrowBack />
+              </IconButton>
+              <Typography variant="h5" component="h1">
+                Patient Details
               </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Name
-                  </Typography>
-                  <Typography variant="body1">
-                    {`${patient.firstName} ${patient.lastName}`}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Email
-                  </Typography>
-                  <Typography variant="body1">{patient.email}</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Phone
-                  </Typography>
-                  <Typography variant="body1">{patient.phone}</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Date of Birth
-                  </Typography>
-                  <Typography variant="body1">{patient.dateOfBirth}</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
+            </Stack>
+          </Box>
 
-          {/* Assigned Procedures */}
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: '100%' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">
-                  Assigned Procedures
+          {/* Patient Info */}
+          <Grid container spacing={4}>
+            {/* Basic Information */}
+            <Grid item xs={12} md={6}>
+              <Paper variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Basic Information
                 </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={handleAssignProcedure}
-                >
-                  Assign Procedure
-                </Button>
-              </Box>
-              <Divider sx={{ mb: 2 }} />
-              <List>
-                {patient.assignedProcedures.map((procedure) => (
-                  <ListItem
-                    key={procedure.id}
-                    divider
-                    secondaryAction={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: procedure.status === 'Completed' ? 'success.main' : 'warning.main',
-                        }}
-                      >
-                        {procedure.status}
-                      </Typography>
-                    }
-                  >
-                    <ListItemText
-                      primary={procedure.name}
-                      secondary={`Assigned: ${procedure.assignedDate}`}
+                <Divider sx={{ mb: 2 }} />
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Name
+                    </Typography>
+                    <Typography>
+                      {`${patient.firstName} ${patient.lastName}`}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Email
+                    </Typography>
+                    <Typography>{patient.email}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Phone
+                    </Typography>
+                    <Typography>{patient.phone}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Date of Birth
+                    </Typography>
+                    <Typography>
+                      {new Date(patient.dateOfBirth).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Status
+                    </Typography>
+                    <Chip
+                      label={patient.status}
+                      color={patient.status === 'Active' ? 'success' : 'default'}
+                      size="small"
                     />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid>
 
-        {/* Success Message */}
-        <Snackbar
-          open={showSuccess}
-          autoHideDuration={6000}
-          onClose={() => setShowSuccess(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert
-            onClose={() => setShowSuccess(false)}
-            severity="success"
-            sx={{ width: '100%' }}
-          >
-            Procedure assigned successfully!
-          </Alert>
-        </Snackbar>
+            {/* Progress & Assignments */}
+            <Grid item xs={12} md={6}>
+              <Paper variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Progress & Assignments
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Current Assignment
+                    </Typography>
+                    <Typography>
+                      {patient.currentAssignment || 'No active assignment'}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Overall Progress
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Typography variant="body2">
+                        {`${patient.assignments.completed}/${patient.assignments.total}`}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={(patient.assignments.completed / patient.assignments.total) * 100}
+                        sx={{ width: 100 }}
+                      />
+                    </Box>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          {/* Action Buttons */}
+          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Button
+              startIcon={<MessageIcon />}
+              variant="outlined"
+              onClick={() => navigate('/doctor/messages')}
+            >
+              Send Message
+            </Button>
+            <Button
+              startIcon={<EditIcon />}
+              variant="contained"
+              onClick={() => navigate(`/doctor/patients/${patient.id}/edit`)}
+            >
+              Edit Patient
+            </Button>
+          </Box>
+        </Paper>
       </Container>
     </Box>
   );

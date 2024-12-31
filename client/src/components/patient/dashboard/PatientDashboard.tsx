@@ -18,64 +18,42 @@ import {
 } from '@mui/material';
 import {
   Message as MessageIcon,
+  Schedule as ScheduleIcon,
   PlayArrow as PlayArrowIcon,
   CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
 } from '@mui/icons-material';
-import { PatientHeader } from '../shared/PatientHeader';
 
 interface Assignment {
   id: string;
   title: string;
   type: string;
   status: 'Sent' | 'In Progress' | 'Completed';
-  lastUpdated: string;
   description: string;
 }
 
 export const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [unreadMessages] = useState(2); // Mock unread messages count
+  const [unreadMessages] = useState(2);
 
   useEffect(() => {
-    // Mock API call to fetch assignments
-    const fetchAssignments = async () => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock assignments data
-      const mockAssignments: Assignment[] = [
-        {
-          id: '1',
-          title: 'Dental Cleaning Consent Form',
-          type: 'Consent Form',
-          status: 'Sent',
-          lastUpdated: '2024-01-20T10:00:00Z',
-          description: 'Please review and sign the consent form for your upcoming dental cleaning procedure.',
-        },
-        {
-          id: '2',
-          title: 'Root Canal Educational Video',
-          type: 'Educational Video',
-          status: 'In Progress',
-          lastUpdated: '2024-01-19T15:30:00Z',
-          description: 'Watch this informative video about the root canal procedure.',
-        },
-        {
-          id: '3',
-          title: 'Post-Procedure Care Instructions',
-          type: 'Document',
-          status: 'Completed',
-          lastUpdated: '2024-01-18T09:15:00Z',
-          description: 'Important instructions for after your procedure.',
-        },
-      ];
-
-      setAssignments(mockAssignments);
-    };
-
-    fetchAssignments();
+    const mockAssignments: Assignment[] = [
+      {
+        id: '1',
+        title: 'Dental Cleaning Consent Form',
+        type: 'Consent Form',
+        status: 'Sent',
+        description: 'Please review and sign the consent form for your upcoming dental cleaning procedure.',
+      },
+      {
+        id: '2',
+        title: 'Root Canal Educational Video',
+        type: 'Educational Video',
+        status: 'In Progress',
+        description: 'Watch this informative video about the root canal procedure.',
+      },
+    ];
+    setAssignments(mockAssignments);
   }, []);
 
   const handleOpenAssignment = (assignmentId: string) => {
@@ -93,26 +71,8 @@ export const PatientDashboard: React.FC = () => {
     }
   };
 
-  const getStatusChip = (status: Assignment['status']) => {
-    const statusColors = {
-      Completed: 'success',
-      'In Progress': 'warning',
-      Sent: 'info',
-    };
-
-    return (
-      <Chip
-        label={status}
-        color={statusColors[status] as 'success' | 'warning' | 'info'}
-        size="small"
-        sx={{ minWidth: 100 }}
-      />
-    );
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PatientHeader />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Grid container spacing={3}>
           {/* Welcome Section */}
@@ -171,7 +131,14 @@ export const PatientDashboard: React.FC = () => {
                                 size="small"
                                 variant="outlined"
                               />
-                              {getStatusChip(assignment.status)}
+                              <Chip
+                                label={assignment.status}
+                                color={
+                                  assignment.status === 'Completed' ? 'success' :
+                                  assignment.status === 'In Progress' ? 'warning' : 'info'
+                                }
+                                size="small"
+                              />
                             </Box>
                           </Box>
                         }

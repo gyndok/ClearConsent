@@ -1,342 +1,307 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
-  Paper,
   Typography,
-  Divider,
-  TextField,
-  Switch,
+  Paper,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
   Button,
+  Divider,
   Grid,
   Alert,
   Snackbar,
-  Tab,
-  Tabs,
 } from '@mui/material';
-import { DoctorHeader } from '../../shared/DoctorHeader';
-import { useAuth } from '../../../contexts/AuthContext';
+import { SelectChangeEvent } from '@mui/material/Select';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`settings-tabpanel-${index}`}
-      aria-labelledby={`settings-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-interface SettingsData {
-  account: {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-    twoFactorEnabled: boolean;
-  };
+interface SettingsState {
   notifications: {
-    patientCompletions: boolean;
-    weeklySummary: boolean;
-    systemUpdates: boolean;
+    email: boolean;
+    sms: boolean;
+    desktop: boolean;
+    frequency: string;
   };
-  subscription: {
-    currentPlan: string;
-    billingCycle: string;
-    nextBillingDate: string;
+  privacy: {
+    profileVisibility: string;
+    showContactInfo: boolean;
   };
-  preferences: {
-    defaultLanguage: string;
-    autoSendReminders: boolean;
-    reminderFrequency: string;
+  security: {
+    twoFactorAuth: boolean;
+    sessionTimeout: string;
+  };
+  appearance: {
+    theme: string;
+    fontSize: string;
   };
 }
 
-const DoctorSettings: React.FC = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(0);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [settings, setSettings] = useState<SettingsData>({
-    account: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-      twoFactorEnabled: false,
-    },
+export const DoctorSettings: React.FC = () => {
+  const [settings, setSettings] = useState<SettingsState>({
     notifications: {
-      patientCompletions: true,
-      weeklySummary: true,
-      systemUpdates: true,
+      email: true,
+      sms: false,
+      desktop: true,
+      frequency: 'immediate',
     },
-    subscription: {
-      currentPlan: 'Professional',
-      billingCycle: 'Monthly',
-      nextBillingDate: '2024-02-01',
+    privacy: {
+      profileVisibility: 'registered',
+      showContactInfo: false,
     },
-    preferences: {
-      defaultLanguage: 'English',
-      autoSendReminders: true,
-      reminderFrequency: 'Weekly',
+    security: {
+      twoFactorAuth: false,
+      sessionTimeout: '30min',
+    },
+    appearance: {
+      theme: 'light',
+      fontSize: 'medium',
     },
   });
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+  const handleNotificationChange = (field: keyof typeof settings.notifications) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [field]: event.target.checked,
+      },
+    }));
   };
 
-  const handleInputChange = (
-    section: keyof SettingsData,
-    field: string,
-    value: string | boolean
+  const handlePrivacyChange = (field: keyof typeof settings.privacy) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSettings(prev => ({
+      ...prev,
+      privacy: {
+        ...prev.privacy,
+        [field]: event.target.checked,
+      },
+    }));
+  };
+
+  const handleSecurityChange = (field: keyof typeof settings.security) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSettings(prev => ({
+      ...prev,
+      security: {
+        ...prev.security,
+        [field]: event.target.checked,
+      },
+    }));
+  };
+
+  const handleSelectChange = (section: keyof SettingsState, field: string) => (
+    event: SelectChangeEvent
   ) => {
     setSettings(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: value,
+        [field]: event.target.value,
       },
     }));
   };
 
-  const handleSave = async () => {
-    setIsSubmitting(true);
-    try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  const handleSave = () => {
+    // Mock API call to save settings
+    setTimeout(() => {
       setShowSuccess(true);
-      // Navigate back to dashboard after successful save
-      setTimeout(() => {
-        navigate('/doctor/dashboard');
-      }, 1000); // Wait for 1 second to show success message
-    } catch (error) {
-      console.error('Error saving settings:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, 500);
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DoctorHeader />
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Settings
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper sx={{ p: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Settings
+        </Typography>
+
+        {/* Notifications Section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Notifications
           </Typography>
-          <Divider sx={{ mb: 3 }} />
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.notifications.email}
+                    onChange={handleNotificationChange('email')}
+                  />
+                }
+                label="Email Notifications"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.notifications.sms}
+                    onChange={handleNotificationChange('sms')}
+                  />
+                }
+                label="SMS Notifications"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.notifications.desktop}
+                    onChange={handleNotificationChange('desktop')}
+                  />
+                }
+                label="Desktop Notifications"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Notification Frequency</InputLabel>
+                <Select
+                  value={settings.notifications.frequency}
+                  label="Notification Frequency"
+                  onChange={handleSelectChange('notifications', 'frequency')}
+                >
+                  <MenuItem value="immediate">Immediate</MenuItem>
+                  <MenuItem value="hourly">Hourly Digest</MenuItem>
+                  <MenuItem value="daily">Daily Digest</MenuItem>
+                  <MenuItem value="weekly">Weekly Digest</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
 
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
-            aria-label="Settings tabs"
+        {/* Privacy Section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Privacy
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Profile Visibility</InputLabel>
+                <Select
+                  value={settings.privacy.profileVisibility}
+                  label="Profile Visibility"
+                  onChange={handleSelectChange('privacy', 'profileVisibility')}
+                >
+                  <MenuItem value="public">Public</MenuItem>
+                  <MenuItem value="registered">Registered Users Only</MenuItem>
+                  <MenuItem value="private">Private</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.privacy.showContactInfo}
+                    onChange={handlePrivacyChange('showContactInfo')}
+                  />
+                }
+                label="Show Contact Information"
+              />
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Security Section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Security
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.security.twoFactorAuth}
+                    onChange={handleSecurityChange('twoFactorAuth')}
+                  />
+                }
+                label="Two-Factor Authentication"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Session Timeout</InputLabel>
+                <Select
+                  value={settings.security.sessionTimeout}
+                  label="Session Timeout"
+                  onChange={handleSelectChange('security', 'sessionTimeout')}
+                >
+                  <MenuItem value="15min">15 minutes</MenuItem>
+                  <MenuItem value="30min">30 minutes</MenuItem>
+                  <MenuItem value="1hour">1 hour</MenuItem>
+                  <MenuItem value="4hours">4 hours</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Appearance Section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Appearance
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Theme</InputLabel>
+                <Select
+                  value={settings.appearance.theme}
+                  label="Theme"
+                  onChange={handleSelectChange('appearance', 'theme')}
+                >
+                  <MenuItem value="light">Light</MenuItem>
+                  <MenuItem value="dark">Dark</MenuItem>
+                  <MenuItem value="system">System Default</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Font Size</InputLabel>
+                <Select
+                  value={settings.appearance.fontSize}
+                  label="Font Size"
+                  onChange={handleSelectChange('appearance', 'fontSize')}
+                >
+                  <MenuItem value="small">Small</MenuItem>
+                  <MenuItem value="medium">Medium</MenuItem>
+                  <MenuItem value="large">Large</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={handleSave}
           >
-            <Tab label="Account" aria-label="Account settings" />
-            <Tab label="Notifications" aria-label="Notification settings" />
-            <Tab label="Subscription" aria-label="Subscription settings" />
-            <Tab label="Preferences" aria-label="Preference settings" />
-          </Tabs>
-
-          {/* Account Settings */}
-          <TabPanel value={activeTab} index={0}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Change Password
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  type="password"
-                  label="Current Password"
-                  value={settings.account.currentPassword}
-                  onChange={(e) => handleInputChange('account', 'currentPassword', e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  type="password"
-                  label="New Password"
-                  value={settings.account.newPassword}
-                  onChange={(e) => handleInputChange('account', 'newPassword', e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  type="password"
-                  label="Confirm New Password"
-                  value={settings.account.confirmPassword}
-                  onChange={(e) => handleInputChange('account', 'confirmPassword', e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.account.twoFactorEnabled}
-                      onChange={(e) => handleInputChange('account', 'twoFactorEnabled', e.target.checked)}
-                    />
-                  }
-                  label="Enable Two-Factor Authentication"
-                />
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          {/* Notification Settings */}
-          <TabPanel value={activeTab} index={1}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.notifications.patientCompletions}
-                      onChange={(e) => handleInputChange('notifications', 'patientCompletions', e.target.checked)}
-                    />
-                  }
-                  label="Patient Form Completion Notifications"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.notifications.weeklySummary}
-                      onChange={(e) => handleInputChange('notifications', 'weeklySummary', e.target.checked)}
-                    />
-                  }
-                  label="Weekly Summary Reports"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.notifications.systemUpdates}
-                      onChange={(e) => handleInputChange('notifications', 'systemUpdates', e.target.checked)}
-                    />
-                  }
-                  label="System Updates and Announcements"
-                />
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          {/* Subscription Settings */}
-          <TabPanel value={activeTab} index={2}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Current Plan: {settings.subscription.currentPlan}
-                </Typography>
-                <Typography variant="subtitle1" gutterBottom>
-                  Billing Cycle: {settings.subscription.billingCycle}
-                </Typography>
-                <Typography variant="subtitle1" gutterBottom>
-                  Next Billing Date: {settings.subscription.nextBillingDate}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Button variant="outlined" color="primary">
-                  Upgrade Plan
-                </Button>
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          {/* Practice Preferences */}
-          <TabPanel value={activeTab} index={3}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Default Language"
-                  value={settings.preferences.defaultLanguage}
-                  onChange={(e) => handleInputChange('preferences', 'defaultLanguage', e.target.value)}
-                  SelectProps={{
-                    native: true,
-                    inputProps: {
-                      'aria-label': 'Default Language Selection',
-                      id: 'default-language-select'
-                    }
-                  }}
-                >
-                  <option value="English">English</option>
-                  <option value="Spanish">Spanish</option>
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.preferences.autoSendReminders}
-                      onChange={(e) => handleInputChange('preferences', 'autoSendReminders', e.target.checked)}
-                    />
-                  }
-                  label="Automatically Send Patient Reminders"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Reminder Frequency"
-                  value={settings.preferences.reminderFrequency}
-                  onChange={(e) => handleInputChange('preferences', 'reminderFrequency', e.target.value)}
-                  SelectProps={{
-                    native: true,
-                    inputProps: {
-                      'aria-label': 'Reminder Frequency Selection',
-                      id: 'reminder-frequency-select'
-                    }
-                  }}
-                >
-                  <option value="Daily">Daily</option>
-                  <option value="Weekly">Weekly</option>
-                  <option value="Monthly">Monthly</option>
-                </TextField>
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-            <Button
-              variant="outlined"
-              onClick={() => navigate('/doctor/dashboard')}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
+            Save Changes
+          </Button>
+        </Box>
+      </Paper>
 
       <Snackbar
         open={showSuccess}
@@ -349,11 +314,9 @@ const DoctorSettings: React.FC = () => {
           severity="success"
           sx={{ width: '100%' }}
         >
-          Settings updated successfully!
+          Settings saved successfully!
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
-};
-
-export default DoctorSettings; 
+}; 

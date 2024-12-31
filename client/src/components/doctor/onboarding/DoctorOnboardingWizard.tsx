@@ -49,8 +49,8 @@ const OnboardingWizardContent = () => {
         console.log('Form submitted:', data);
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
         navigate('/doctor/dashboard');
-      } catch (err) {
-        setError('An error occurred while submitting the form. Please try again.');
+      } catch {
+        console.error('Error submitting onboarding data');
       } finally {
         setIsSubmitting(false);
       }
