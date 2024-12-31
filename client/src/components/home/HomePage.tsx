@@ -1,539 +1,472 @@
 import React from 'react';
-import { Box, Button, Container, Grid, Typography, useTheme, useMediaQuery, Paper, Tooltip, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import SecurityIcon from '@mui/icons-material/Security';
-import DescriptionIcon from '@mui/icons-material/Description';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import PersonIcon from '@mui/icons-material/Person';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import CheckIcon from '@mui/icons-material/Check';
-import GpsFixedIcon from '@mui/icons-material/GpsFixed';
-import DataIcon from '@mui/icons-material/DataUsage';
-import LanguageIcon from '@mui/icons-material/Language';
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
-import GroupsIcon from '@mui/icons-material/Groups';
-import StarIcon from '@mui/icons-material/Star';
-import { Header } from '../shared/Header';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Container,
+  Grid,
+  Paper,
+  Card,
+  CardContent,
+  Avatar,
+} from '@mui/material';
+import {
+  DescriptionOutlined as DocumentIcon,
+  OndemandVideoOutlined as VideoIcon,
+  TrackChangesOutlined as TrackingIcon,
+  SecurityOutlined as SecurityIcon,
+  CreateOutlined as CreateIcon,
+  QrCodeOutlined as QrCodeIcon,
+  FactCheckOutlined as CheckIcon,
+  QueryStatsOutlined as StatsIcon,
+} from '@mui/icons-material';
 
-const features = [
-  {
-    icon: <SecurityIcon />,
-    title: 'HIPAA Compliant',
-    description: 'Secure, encrypted, and fully compliant with healthcare privacy standards.'
-  },
-  {
-    icon: <DescriptionIcon />,
-    title: 'Smart Forms',
-    description: 'Dynamic consent forms that adapt to patient responses and procedure requirements.'
-  },
-  {
-    icon: <MedicalServicesIcon />,
-    title: 'Medical Focus',
-    description: 'Designed specifically for healthcare procedures and patient education.'
-  },
-  {
-    icon: <PersonIcon />,
-    title: 'Patient Centric',
-    description: 'Easy to understand language and interactive educational content.'
+// Brand Colors
+const colors = {
+  primary: '#2C5282',    // Deep blue - trustworthy, professional
+  secondary: '#38B2AC',  // Teal - modern, healthcare
+  accent1: '#5A67D8',    // Indigo - calming, tech-forward
+  accent2: '#4FD1C5',    // Light teal - fresh, approachable
+  background: '#F7FAFC', // Cool white - clean, medical
+  text: '#2D3748',       // Dark slate - readable
+  gradient: {
+    start: '#2C5282',    // Deep blue
+    end: '#5A67D8',      // Indigo
   }
-];
+};
 
-const clinicianBenefits = [
-  'Streamlined consent process',
-  'Reduced documentation time',
-  'Better patient education',
-  'Lower legal risks'
-];
+export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
 
-const patientBenefits = [
-  'Clear procedure information',
-  'Interactive education',
-  'Multiple language support',
-  'Easy access to documents'
-];
+  const features = [
+    {
+      title: 'Digital Consents & E-Signatures',
+      description: 'Secure, compliant electronic consent forms with legally binding e-signatures.',
+      icon: <DocumentIcon fontSize="large" />,
+    },
+    {
+      title: 'Educational Videos & Documents',
+      description: 'Comprehensive multimedia resources for better patient understanding.',
+      icon: <VideoIcon fontSize="large" />,
+    },
+    {
+      title: 'Progress Tracking & Reminders',
+      description: 'Monitor patient engagement and automate follow-ups.',
+      icon: <TrackingIcon fontSize="large" />,
+    },
+    {
+      title: 'HIPAA-Ready Storage',
+      description: 'Enterprise-grade security for all your patient data.',
+      icon: <SecurityIcon fontSize="large" />,
+    },
+  ];
 
-const systemBenefits = [
-  'Improved compliance',
-  'Reduced paperwork',
-  'Better audit trails',
-  'Cost savings'
-];
+  const steps = [
+    {
+      title: 'Create Procedures & Forms',
+      description: 'Doctors set up digital consent forms and educational materials.',
+      icon: <CreateIcon fontSize="large" />,
+    },
+    {
+      title: 'Invite Patients',
+      description: 'Share secure access via email, link, or QR code.',
+      icon: <QrCodeIcon fontSize="large" />,
+    },
+    {
+      title: 'Review & E-Sign',
+      description: 'Patients complete forms and acknowledge understanding.',
+      icon: <CheckIcon fontSize="large" />,
+    },
+    {
+      title: 'Track Progress',
+      description: 'Monitor completion and patient engagement.',
+      icon: <StatsIcon fontSize="large" />,
+    },
+  ];
 
-const dataBenefits = [
-  'Comprehensive analytics',
-  'Quality metrics',
-  'Outcome tracking',
-  'Research capabilities'
-];
-
-export const HomePage = () => {
-  const theme = useTheme();
+  const testimonials = [
+    {
+      quote: "ClearConsent has transformed how we handle patient education and consent. It's efficient and our patients love it.",
+      author: "Dr. Sarah Chen",
+      role: "Orthopedic Surgeon",
+      avatar: "SC",
+    },
+    {
+      quote: "The platform is intuitive and has significantly reduced our paperwork while improving patient understanding.",
+      author: "Dr. Michael Wilson",
+      role: "Family Medicine",
+      avatar: "MW",
+    },
+  ];
 
   return (
-    <>
-      <Header />
-      <Box 
-        component="main"
-        sx={{ 
-          bgcolor: theme.palette.secondary.light,
-          minHeight: '100vh',
-          pb: { xs: 8, md: 12 },
-          mt: '64px'
-        }}
-      >
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Navigation */}
+      <AppBar position="static" sx={{ bgcolor: colors.primary, boxShadow: 2 }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 700 }}>
+            ClearConsent
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              color="inherit"
+              onClick={() => navigate('/doctor/login')}
+              sx={{ fontWeight: 500 }}
+            >
+              Doctor Portal
+            </Button>
+            <Button
+              color="inherit"
+              onClick={() => navigate('/patient/login')}
+              sx={{ fontWeight: 500 }}
+            >
+              Patient Portal
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
       {/* Hero Section */}
-      <Box
-        sx={{
+      <Box 
+        sx={{ 
+          background: `linear-gradient(135deg, ${colors.gradient.start} 0%, ${colors.gradient.end} 100%)`,
+          color: 'white',
+          py: { xs: 8, md: 12 },
           position: 'relative',
-          minHeight: { xs: '80vh', md: '90vh' },
-          width: '100vw',
-          marginLeft: '-50vw',
-          left: '50%',
-          backgroundColor: '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
           overflow: 'hidden',
         }}
       >
         <Container maxWidth="lg">
-          <Box 
-            sx={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: { xs: '70vh', md: '80vh' },
-              textAlign: 'center',
-              maxWidth: 800,
-              mx: 'auto',
-              px: 2,
-            }}
-          >
-            <Typography
-              variant="h1"
-              sx={{
-                mb: 2,
-                fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-                fontWeight: 800,
-                color: theme.palette.text.primary,
-                lineHeight: 1.2,
-              }}
-            >
-              Precise and complete patient consent.
-            </Typography>
-            <Typography
-              variant="h2"
-              sx={{
-                mb: 2,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                fontWeight: 700,
-                color: theme.palette.primary.main,
-                lineHeight: 1.2,
-              }}
-            >
-              Better data, better outcomes.
-            </Typography>
-            <Typography
-              variant="h3"
-              sx={{ 
-                mb: 6, 
-                fontSize: { xs: '1.25rem', md: '1.5rem' }, 
-                color: theme.palette.text.secondary,
-                fontWeight: 500
-              }}
-            >
-              Medical Consents, Transformed.
-            </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 2,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}>
-              <Button
-                variant="contained"
-                size="large"
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={7}>
+              <Typography 
+                variant="h2" 
+                component="h1" 
+                gutterBottom
                 sx={{ 
-                  minWidth: 180,
-                  fontSize: '1.125rem',
-                  py: 1.5,
-                  px: 3,
+                  fontWeight: 700,
+                  fontSize: { xs: '2.5rem', md: '3.5rem' },
+                  mb: 3,
                 }}
               >
-                Request a Demo
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
+                ClearConsent: Empowering Informed Healthcare Decisions
+              </Typography>
+              <Typography 
+                variant="h5" 
                 sx={{ 
-                  minWidth: 180,
-                  fontSize: '1.125rem',
-                  py: 1.5,
-                  px: 3,
+                  mb: 4,
+                  opacity: 0.9,
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
+                  fontWeight: 400,
                 }}
               >
-                Learn More
-              </Button>
-            </Box>
-          </Box>
+                Streamline your patient education, digital consent, and communication in one secure platform.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => navigate('/doctor/onboarding')}
+                  sx={{ 
+                    bgcolor: colors.secondary,
+                    '&:hover': { bgcolor: '#319795' },
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                  }}
+                >
+                  For Doctors
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate('/patient/login')}
+                  sx={{ 
+                    color: 'white',
+                    borderColor: 'white',
+                    '&:hover': { 
+                      borderColor: 'rgba(255,255,255,0.8)',
+                      bgcolor: 'rgba(255,255,255,0.1)',
+                    },
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                  }}
+                >
+                  For Patients
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <Paper 
+                elevation={6}
+                sx={{ 
+                  height: 300,
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 2,
+                }}
+              >
+                <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                  Hero Image Placeholder
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
 
-      {/* Features Overview - Updated to match FirstHx style */}
-      <Box 
-        id="features"
-        sx={{ 
-          py: { xs: 8, md: 12 },
-          backgroundColor: '#FFBA4F',
-          width: '100vw',
-          position: 'relative',
-          marginLeft: '-50vw',
-          left: '50%',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Typography 
-            variant="h2" 
-            sx={{ 
-              mb: { xs: 6, md: 8 }, 
-              textAlign: 'center',
-              color: '#2D2620',
-            }}
-          >
-            Why ClearConsent?
-          </Typography>
-          <Grid container spacing={3}>
-            {features.map((feature, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 4,
-                    height: '100%',
-                    borderRadius: 2,
-                    backgroundColor: '#FFFFFF',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                    },
-                  }}
-                >
-                  {React.cloneElement(feature.icon, {
-                    sx: { 
-                      fontSize: 40,
-                      color: theme.palette.primary.main,
-                      mb: 2
-                    },
-                    'aria-hidden': 'true'
-                  })}
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+        <Typography 
+          variant="h3" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            color: colors.text,
+            mb: 6,
+            fontWeight: 700,
+            fontSize: { xs: '2rem', md: '2.5rem' },
+          }}
+        >
+          Key Features
+        </Typography>
+        <Grid container spacing={4}>
+          {features.map((feature, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ color: colors.primary, mb: 2 }}>
+                    {feature.icon}
+                  </Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                     {feature.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body2" color="text.secondary">
                     {feature.description}
                   </Typography>
-                </Paper>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* How It Works Section */}
+      <Box sx={{ bgcolor: colors.background, py: { xs: 6, md: 10 } }}>
+        <Container maxWidth="lg">
+          <Typography 
+            variant="h3" 
+            align="center" 
+            gutterBottom
+            sx={{ 
+              color: colors.text,
+              mb: 6,
+              fontWeight: 700,
+              fontSize: { xs: '2rem', md: '2.5rem' },
+            }}
+          >
+            How It Works
+          </Typography>
+          <Grid container spacing={4}>
+            {steps.map((step, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Box 
+                  sx={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box 
+                    sx={{ 
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      bgcolor: colors.primary,
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2,
+                    }}
+                  >
+                    {step.icon}
+                  </Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                    {step.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {step.description}
+                  </Typography>
+                </Box>
               </Grid>
             ))}
           </Grid>
         </Container>
       </Box>
 
-      {/* Benefits Section - Inspired by FirstHx */}
-      <Box sx={{ py: { xs: 8, md: 12 } }}>
-        <Container maxWidth="lg">
+      {/* Testimonials Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+        <Typography 
+          variant="h3" 
+          align="center" 
+          gutterBottom
+          sx={{ 
+            color: colors.text,
+            mb: 6,
+            fontWeight: 700,
+            fontSize: { xs: '2rem', md: '2.5rem' },
+          }}
+        >
+          What Doctors Say
+        </Typography>
+        <Grid container spacing={4}>
+          {testimonials.map((testimonial, index) => (
+            <Grid item xs={12} md={6} key={index}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                    <Avatar 
+                      sx={{ 
+                        bgcolor: colors.accent2,
+                        width: 56,
+                        height: 56,
+                      }}
+                    >
+                      {testimonial.avatar}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        {testimonial.author}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {testimonial.role}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
+                    "{testimonial.quote}"
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Secondary CTA Section */}
+      <Box 
+        sx={{ 
+          bgcolor: colors.accent1,
+          color: 'white',
+          py: { xs: 6, md: 8 },
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="md">
           <Typography 
-            variant="h2" 
+            variant="h4" 
+            gutterBottom
             sx={{ 
-              mb: { xs: 6, md: 8 }, 
-              textAlign: 'center'
+              fontWeight: 700,
+              mb: 3,
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
             }}
           >
-            Benefits
+            Ready to Transform Your Practice?
           </Typography>
-          <Grid container spacing={6}>
-            {/* Clinicians Benefits */}
-            <Grid item xs={12} md={3}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Clinicians
-              </Typography>
-              {clinicianBenefits.map((benefit, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                  <CheckIcon sx={{ color: '#4CAF50', mr: 1, mt: 0.5 }} />
-                  <Typography variant="body1">
-                    {benefit}
-                  </Typography>
-                </Box>
-              ))}
-            </Grid>
-            
-            {/* Patients Benefits */}
-            <Grid item xs={12} md={3}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Patients
-              </Typography>
-              {patientBenefits.map((benefit, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                  <CheckIcon sx={{ color: '#4CAF50', mr: 1, mt: 0.5 }} />
-                  <Typography variant="body1">
-                    {benefit}
-                  </Typography>
-                </Box>
-              ))}
-            </Grid>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              mb: 4,
+              opacity: 0.9,
+              fontWeight: 400,
+              fontSize: { xs: '1rem', md: '1.25rem' },
+            }}
+          >
+            Join thousands of healthcare providers using ClearConsent to streamline patient communication.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/doctor/onboarding')}
+            sx={{ 
+              bgcolor: colors.secondary,
+              '&:hover': { bgcolor: '#319795' },
+              px: 6,
+              py: 1.5,
+              fontSize: '1.1rem',
+            }}
+          >
+            Get Started Now
+          </Button>
+        </Container>
+      </Box>
 
-            {/* Healthcare System Benefits */}
-            <Grid item xs={12} md={3}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Healthcare System
+      {/* Footer */}
+      <Box sx={{ bgcolor: colors.text, color: 'white', py: 4 }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={2} justifyContent="space-between" alignItems="center">
+            <Grid item>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                © 2024 ClearConsent. All rights reserved.
               </Typography>
-              {systemBenefits.map((benefit, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                  <CheckIcon sx={{ color: '#4CAF50', mr: 1, mt: 0.5 }} />
-                  <Typography variant="body1">
-                    {benefit}
-                  </Typography>
-                </Box>
-              ))}
             </Grid>
-
-            {/* Data Benefits */}
-            <Grid item xs={12} md={3}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Data
-              </Typography>
-              {dataBenefits.map((benefit, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                  <CheckIcon sx={{ color: '#4CAF50', mr: 1, mt: 0.5 }} />
-                  <Typography variant="body1">
-                    {benefit}
-                  </Typography>
-                </Box>
-              ))}
+            <Grid item>
+              <Box sx={{ display: 'flex', gap: 3 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    opacity: 0.8,
+                    cursor: 'pointer',
+                    '&:hover': { opacity: 1 },
+                  }}
+                >
+                  Terms of Service
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    opacity: 0.8,
+                    cursor: 'pointer',
+                    '&:hover': { opacity: 1 },
+                  }}
+                >
+                  Privacy Policy
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    opacity: 0.8,
+                    cursor: 'pointer',
+                    '&:hover': { opacity: 1 },
+                  }}
+                >
+                  Contact Support
+                </Typography>
+              </Box>
             </Grid>
           </Grid>
         </Container>
       </Box>
-
-      {/* Testimonials Section */}
-      <Box 
-        id="testimonials"
-        sx={{ 
-          py: { xs: 8, md: 12 },
-          backgroundColor: '#FFFFFF',
-          borderRadius: 4,
-          my: 8,
-        }}
-      >
-        <Typography 
-          variant="h2" 
-          sx={{ 
-            mb: { xs: 6, md: 8 }, 
-            textAlign: 'center',
-            maxWidth: '800px',
-            mx: 'auto'
-          }}
-        >
-          What Healthcare Providers Say
-        </Typography>
-        <Grid container spacing={4}>
-          {testimonials.map((testimonial, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 4,
-                  height: '100%',
-                  borderRadius: 2,
-                  position: 'relative',
-                  backgroundColor: theme.palette.secondary.light,
-                }}
-              >
-                <FormatQuoteIcon 
-                  sx={{ 
-                    position: 'absolute',
-                    top: 16,
-                    left: 16,
-                    color: theme.palette.primary.main,
-                    opacity: 0.2,
-                    fontSize: 40
-                  }}
-                />
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    mb: 3,
-                    color: theme.palette.text.primary,
-                    fontStyle: 'italic',
-                  }}
-                >
-                  "{testimonial.quote}"
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
-                      {testimonial.name}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                      {testimonial.title}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      {/* FAQ Section */}
-      <Box 
-        id="faq"
-        sx={{ 
-          py: { xs: 8, md: 12 },
-          mb: 8,
-        }}
-      >
-        <Typography 
-          variant="h2" 
-          sx={{ 
-            mb: { xs: 6, md: 8 }, 
-            textAlign: 'center',
-            maxWidth: '800px',
-            mx: 'auto'
-          }}
-        >
-          Frequently Asked Questions
-        </Typography>
-        <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-          {faqs.map((faq, index) => (
-            <Accordion
-              key={index}
-              elevation={0}
-              sx={{
-                mb: 2,
-                border: `1px solid ${theme.palette.secondary.light}`,
-                '&:before': { display: 'none' },
-                borderRadius: '8px !important',
-                overflow: 'hidden',
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.primary.main }} />}
-                sx={{
-                  backgroundColor: '#FFFFFF',
-                  '&:hover': {
-                    backgroundColor: theme.palette.secondary.light,
-                  },
-                }}
-              >
-                <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
-                  {faq.question}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ backgroundColor: '#FFFFFF' }}>
-                <Typography variant="body1" sx={{ color: theme.palette.text.secondary }}>
-                  {faq.answer}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
-      </Box>
-
-      {/* Portal Links */}
-      <Box 
-        sx={{ 
-          py: { xs: 8, md: 10 },
-          px: { xs: 3, md: 6 },
-          textAlign: 'center',
-          bgcolor: '#FFFFFF',
-          borderRadius: 4,
-          boxShadow: `0 8px 32px -8px rgba(${hexToRgb(theme.palette.primary.main)}, 0.12)`,
-        }}
-      >
-        <Typography variant="h2" sx={{ mb: 2 }}>
-          Ready to Get Started?
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 6, maxWidth: '600px', mx: 'auto', color: theme.palette.text.secondary }}>
-          Choose your portal to begin streamlining the consent process
-        </Typography>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} sm={6} md={4}>
-            <Tooltip title="For healthcare providers to manage consent forms and patient education" arrow>
-              <Button 
-                variant="contained" 
-                size="large" 
-                fullWidth
-                startIcon={<MedicalServicesIcon />}
-              >
-                Doctor Portal
-              </Button>
-            </Tooltip>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Tooltip title="For patients to review materials and provide consent" arrow>
-              <Button 
-                variant="outlined" 
-                size="large" 
-                fullWidth
-                startIcon={<PersonIcon />}
-              >
-                Patient Portal
-              </Button>
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </Box>
     </Box>
-    </>
   );
-};
-
-// Helper function to convert hex to RGB
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '0, 0, 0';
-};
-
-const testimonials = [
-  {
-    quote: "ClearConsent has transformed how we handle patient education and consent. The digital process is seamless, and patients appreciate the clarity and convenience.",
-    name: "Dr. Sarah Chen",
-    title: "Orthopedic Surgeon",
-  },
-  {
-    quote: "The platform has significantly reduced our administrative workload while improving patient understanding of procedures. It's a win-win solution.",
-    name: "Dr. Michael Rodriguez",
-    title: "Family Medicine",
-  },
-  {
-    quote: "Having all consent forms and educational materials in one secure place has made our practice more efficient and reduced potential liability concerns.",
-    name: "Dr. Emily Thompson",
-    title: "Dental Surgeon",
-  },
-];
-
-const faqs = [
-  {
-    question: "Is ClearConsent HIPAA compliant?",
-    answer: "Yes, ClearConsent is fully HIPAA compliant. We implement industry-standard encryption, secure data storage, and strict access controls to protect patient information. Our platform undergoes regular security audits and updates.",
-  },
-  {
-    question: "How do patients access their consent forms?",
-    answer: "Patients receive a secure link or QR code from their healthcare provider. They can then create an account and access all their assigned materials and consent forms through our patient portal.",
-  },
-  {
-    question: "Can we customize consent forms for our practice?",
-    answer: "Absolutely! ClearConsent provides customizable templates that you can modify to match your practice's specific needs. You can add your own branding, specific procedure details, and additional educational materials.",
-  },
-  {
-    question: "What types of digital signatures do you support?",
-    answer: "We support both typed and drawn signatures. All signatures are timestamped and legally binding, meeting healthcare compliance requirements. Patients can sign using any device - computer, tablet, or smartphone.",
-  },
-  {
-    question: "How long are signed consent forms stored?",
-    answer: "Consent forms are securely stored for the duration required by healthcare regulations. You can access your historical records at any time through your provider portal, and export them as needed for your records.",
-  },
-]; 
+}; 

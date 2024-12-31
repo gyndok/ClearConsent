@@ -25,7 +25,6 @@ import {
   Search as SearchIcon,
   Visibility as ViewIcon,
 } from '@mui/icons-material';
-import { DoctorHeader } from '../../shared/DoctorHeader';
 import { AddPatientModal, PatientData } from '../patients/AddPatientModal';
 import { ProceduresAPI, PatientsAPI } from '../../../services/mockDb';
 
@@ -127,7 +126,6 @@ export const DoctorDashboard: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <DoctorHeader />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Grid container spacing={3}>
           {/* Header Section */}

@@ -1,79 +1,42 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from './theme/theme';
-import { AuthProvider } from './contexts/AuthContext';
-import { PrivateRoute } from './components/auth/PrivateRoute';
-import { DoctorDashboard } from './components/doctor/dashboard/DoctorDashboard';
-import DoctorProfile from './components/doctor/profile/DoctorProfile';
-import DoctorSettings from './components/doctor/settings/DoctorSettings';
-import { DoctorLogin } from './components/doctor/auth/DoctorLogin';
-import { PatientDetails } from './components/doctor/patients/PatientDetails';
 import { HomePage } from './components/home/HomePage';
-import { NewProcedurePage } from './components/doctor/procedures/NewProcedurePage';
-import { EditProcedurePage } from './components/doctor/procedures/EditProcedurePage';
+import { DoctorOnboardingWizard } from './components/doctor/onboarding/DoctorOnboardingWizard';
+import { DoctorDashboard } from './components/doctor/dashboard/DoctorDashboard';
+import { DoctorLogin } from './components/doctor/auth/DoctorLogin';
+import { DoctorMessages } from './components/doctor/messages/DoctorMessages';
+import { Header } from './components/shared/Header';
+import { DoctorNavbar } from './components/shared/DoctorNavbar';
+import { AuthProvider } from './contexts/AuthContext';
+
+const NavigationWrapper = () => {
+  const location = useLocation();
+  const isDoctorRoute = location.pathname.startsWith('/doctor') && 
+    !location.pathname.includes('/onboarding') &&
+    !location.pathname.includes('/login');
+
+  return isDoctorRoute ? <DoctorNavbar /> : <Header />;
+};
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <Router>
+      <BrowserRouter>
+        <AuthProvider>
+          <NavigationWrapper />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/doctor/login" element={<DoctorLogin />} />
-            <Route
-              path="/doctor/dashboard"
-              element={
-                <PrivateRoute>
-                  <DoctorDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/doctor/profile"
-              element={
-                <PrivateRoute>
-                  <DoctorProfile />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/doctor/settings"
-              element={
-                <PrivateRoute>
-                  <DoctorSettings />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/doctor/procedures/new"
-              element={
-                <PrivateRoute>
-                  <NewProcedurePage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/doctor/procedures/:procedureId/edit"
-              element={
-                <PrivateRoute>
-                  <EditProcedurePage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/doctor/patients/:patientId"
-              element={
-                <PrivateRoute>
-                  <PatientDetails />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/doctor/onboarding" element={<DoctorOnboardingWizard />} />
+            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/messages" element={<DoctorMessages />} />
           </Routes>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

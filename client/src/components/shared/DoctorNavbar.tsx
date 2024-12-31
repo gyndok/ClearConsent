@@ -8,17 +8,21 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Avatar,
+  Badge,
   useTheme,
 } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
+import {
+  AccountCircle,
+  Message as MessageIcon,
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const DoctorNavbar: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const unreadMessages = 2; // This would come from a context or API call
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,6 +36,7 @@ export const DoctorNavbar: React.FC = () => {
     handleClose();
     if (path === '/logout') {
       logout();
+      navigate('/');
     } else {
       navigate(path);
     }
@@ -51,27 +56,33 @@ export const DoctorNavbar: React.FC = () => {
         <Typography
           variant="h6"
           component="div"
-          sx={{ flexGrow: 1, color: theme.palette.primary.main }}
+          sx={{ 
+            flexGrow: 1, 
+            color: theme.palette.primary.main,
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate('/doctor/dashboard')}
         >
           ClearConsent
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="subtitle2" sx={{ mr: 2 }}>
-            {user?.name || 'Doctor'}
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
             color="inherit"
+            onClick={() => navigate('/doctor/messages')}
           >
-            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-              {user?.name?.[0] || <AccountCircle />}
-            </Avatar>
+            <Badge badgeContent={unreadMessages} color="error">
+              <MessageIcon />
+            </Badge>
           </IconButton>
+
+          <IconButton
+            color="inherit"
+            onClick={handleMenu}
+          >
+            <AccountCircle />
+          </IconButton>
+
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}

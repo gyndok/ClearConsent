@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Button, Container, Paper, Step, StepLabel, Stepper, useTheme, Fade } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Container, Paper, Step, StepLabel, Stepper, useTheme, Fade, Typography, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DoctorOnboardingProvider, useDoctorOnboarding } from '../../../contexts/DoctorOnboardingContext';
 import { BasicInfoStep } from './BasicInfoStep';
@@ -37,18 +37,30 @@ const OnboardingWizardContent = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { data, nextStep, previousStep } = useDoctorOnboarding();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (data.step === steps.length) {
-      // Submit the form and redirect to dashboard
-      console.log('Form submitted:', data);
-      navigate('/doctor/dashboard');
+      setIsSubmitting(true);
+      setError(null);
+      try {
+        // Submit the form and redirect to dashboard
+        console.log('Form submitted:', data);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        navigate('/doctor/dashboard');
+      } catch (err) {
+        setError('An error occurred while submitting the form. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       nextStep();
     }
   };
 
   const handleBack = () => {
+    setError(null);
     previousStep();
   };
 
@@ -63,6 +75,13 @@ const OnboardingWizardContent = () => {
             border: `1px solid ${theme.palette.divider}`,
           }}
         >
+          <Typography variant="h4" align="center" gutterBottom>
+            Doctor Onboarding
+          </Typography>
+          <Typography variant="subtitle1" align="center" sx={{ mb: 4 }}>
+            Please complete the following steps to set up your account
+          </Typography>
+
           <Stepper 
             activeStep={data.step - 1} 
             sx={{ 
@@ -79,6 +98,12 @@ const OnboardingWizardContent = () => {
             ))}
           </Stepper>
 
+          {error && (
+            <Box sx={{ mb: 3 }}>
+              <Typography color="error">{error}</Typography>
+            </Box>
+          )}
+
           <Fade in timeout={300} key={data.step}>
             <Box sx={{ mb: 4 }}>
               <StepContent step={data.step} />
@@ -89,7 +114,7 @@ const OnboardingWizardContent = () => {
             <Button
               variant="outlined"
               onClick={handleBack}
-              disabled={data.step === 1}
+              disabled={data.step === 1 || isSubmitting}
               sx={{ minWidth: 100 }}
             >
               Back
@@ -97,9 +122,16 @@ const OnboardingWizardContent = () => {
             <Button
               variant="contained"
               onClick={handleNext}
+              disabled={isSubmitting}
               sx={{ minWidth: 100 }}
             >
-              {data.step === steps.length ? 'Complete' : 'Next'}
+              {isSubmitting ? (
+                <CircularProgress size={24} />
+              ) : data.step === steps.length ? (
+                'Complete'
+              ) : (
+                'Next'
+              )}
             </Button>
           </Box>
         </Paper>
