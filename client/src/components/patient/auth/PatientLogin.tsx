@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -12,7 +11,6 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 
 export const PatientLogin: React.FC = () => {
-  const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,18 +22,10 @@ export const PatientLogin: React.FC = () => {
     setError(null);
     setIsLoading(true);
 
-    console.log('Attempting login with email:', email);
     try {
-      await login(email, password);
-      console.log('Login successful, navigating to dashboard');
-      navigate('/patient/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An error occurred during login');
-      }
+      await login(email, password, 'patient');
+    } catch {
+      setError('Invalid email or password');
     } finally {
       setIsLoading(false);
     }

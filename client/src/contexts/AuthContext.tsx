@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthAPI, AuthResponse } from '../services/api';
 
 interface User {
   id: string;
@@ -6,11 +8,14 @@ interface User {
   role: 'doctor' | 'patient';
   firstName: string;
   lastName: string;
+  npi?: string;
+  licenseNumber?: string;
+  dateOfBirth?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, role?: 'doctor' | 'patient') => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -18,54 +23,49 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const userData = localStorage.getItem('user_data');
+    return userData ? JSON.parse(userData) : null;
+  });
+  const navigate = useNavigate();
 
-  const login = async (email: string, password: string) => {
-    console.log('Login attempt:', { email });
+  const login = async (email: string, password: string, role: 'doctor' | 'patient' = 'patient') => {
     try {
-      // Mock authentication - replace with actual API call
-      if (!email || !password) {
-        throw new Error('Email and password are required');
-      }
+      let response: AuthResponse;
       
-      // For testing purposes, create a mock patient user
-      const mockUser: User = {
-        id: '1',
-        email,
-        role: 'patient',
-        firstName: 'John',
-        lastName: 'Doe'
-      };
-      console.log('Setting user:', mockUser);
-      setUser(mockUser);
+      if (role === 'doctor') {
+        response = await AuthAPI.loginDoctor(email, password);
+      } else {
+        response = await AuthAPI.loginPatient(email, password);
+      }
+
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user_data', JSON.stringify(response.user));
+      setUser(response.user);
+
+      // Navigate based on role
+      if (response.user.role === 'doctor') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     } catch (error) {
       console.error('Login error:', error);
-      if (error instanceof Error) {
-        throw new Error(`Authentication failed: ${error.message}`);
-      }
       throw new Error('Authentication failed');
     }
   };
 
   const logout = async () => {
-    console.log('Logging out');
     try {
-      // Mock logout - replace with actual API call
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
       setUser(null);
-      console.log('User logged out');
+      navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
-      if (error instanceof Error) {
-        throw new Error(`Logout failed: ${error.message}`);
-      }
       throw new Error('Logout failed');
     }
   };
-
-  console.log('Current auth state:', {
-    user,
-    isAuthenticated: user !== null
-  });
 
   return (
     <AuthContext.Provider value={{

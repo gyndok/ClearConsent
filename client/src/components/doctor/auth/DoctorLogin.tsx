@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -14,7 +13,6 @@ import { useAuth } from '../../../contexts/AuthContext';
 
 export const DoctorLogin: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,9 +25,8 @@ export const DoctorLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/doctor/dashboard');
-    } catch (error) {
+      await login(email, password, 'doctor');
+    } catch {
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);
