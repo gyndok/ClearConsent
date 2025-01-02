@@ -1,27 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Container,
   Typography,
-  Paper,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   Button,
-  IconButton,
-  Badge,
+  Grid,
+  Paper,
   Divider,
   Chip,
+  CircularProgress,
+  Card,
+  CardContent,
+  Container,
+  IconButton,
+  Badge,
 } from '@mui/material';
-import {
-  Message as MessageIcon,
-  Schedule as ScheduleIcon,
-  PlayArrow as PlayArrowIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+import { Message as MessageIcon } from '@mui/icons-material';
+import { PatientHeader } from '../shared/PatientHeader';
 
 interface Assignment {
   id: string;
@@ -35,44 +30,57 @@ export const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [unreadMessages] = useState(2);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const mockAssignments: Assignment[] = [
-      {
-        id: '1',
-        title: 'Dental Cleaning Consent Form',
-        type: 'Consent Form',
-        status: 'Sent',
-        description: 'Please review and sign the consent form for your upcoming dental cleaning procedure.',
-      },
-      {
-        id: '2',
-        title: 'Root Canal Educational Video',
-        type: 'Educational Video',
-        status: 'In Progress',
-        description: 'Watch this informative video about the root canal procedure.',
-      },
-    ];
-    setAssignments(mockAssignments);
+    // Mock API call to fetch assignments
+    const loadData = async () => {
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Mock assignments data
+        const mockAssignments: Assignment[] = [
+          {
+            id: '1',
+            title: 'Dental Cleaning Consent Form',
+            type: 'Consent Form',
+            status: 'Sent',
+            description: 'Please review and sign the consent form for your upcoming dental cleaning procedure.',
+          },
+          {
+            id: '2',
+            title: 'Root Canal Educational Video',
+            type: 'Educational Video',
+            status: 'In Progress',
+            description: 'Watch this informative video about the root canal procedure.',
+          },
+        ];
+        console.log('Setting mock assignments:', mockAssignments);
+        setAssignments(mockAssignments);
+      } catch (error) {
+        console.error('Error loading assignments:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleOpenAssignment = (assignmentId: string) => {
-    navigate(`/patient/assignment/${assignmentId}`);
-  };
-
-  const getStatusIcon = (status: Assignment['status']) => {
-    switch (status) {
-      case 'Completed':
-        return <CheckCircleIcon sx={{ color: 'success.main' }} />;
-      case 'In Progress':
-        return <ScheduleIcon sx={{ color: 'warning.main' }} />;
-      default:
-        return <PlayArrowIcon sx={{ color: 'info.main' }} />;
+    console.log('Opening assignment with ID:', assignmentId);
+    console.log('Navigating to:', `/patient/assignment/${assignmentId}`);
+    try {
+      navigate(`/patient/assignment/${assignmentId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
     }
   };
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <PatientHeader />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Grid container spacing={3}>
           {/* Welcome Section */}
@@ -106,64 +114,51 @@ export const PatientDashboard: React.FC = () => {
                 Your Assignments
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <List>
-                {assignments.map((assignment, index) => (
-                  <React.Fragment key={assignment.id}>
-                    {index > 0 && <Divider />}
-                    <ListItem sx={{ py: 2 }}>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {getStatusIcon(assignment.status)}
-                            <Typography variant="subtitle1">
-                              {assignment.title}
-                            </Typography>
+              {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <Grid container spacing={3}>
+                  {assignments.map((assignment) => (
+                    <Grid item xs={12} sm={6} md={4} key={assignment.id}>
+                      <Card>
+                        <CardContent>
+                          <Typography variant="h6" gutterBottom>
+                            {assignment.title}
+                          </Typography>
+                          <Typography color="textSecondary" gutterBottom>
+                            {assignment.type}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 2 }}>
+                            {assignment.description}
+                          </Typography>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Chip
+                              label={assignment.status}
+                              color={
+                                assignment.status === 'Completed'
+                                  ? 'success'
+                                  : assignment.status === 'In Progress'
+                                  ? 'warning'
+                                  : 'default'
+                              }
+                              size="small"
+                            />
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => handleOpenAssignment(assignment.id)}
+                            >
+                              Open
+                            </Button>
                           </Box>
-                        }
-                        secondary={
-                          <Box sx={{ mt: 1 }}>
-                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                              {assignment.description}
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                              <Chip
-                                label={assignment.type}
-                                size="small"
-                                variant="outlined"
-                              />
-                              <Chip
-                                label={assignment.status}
-                                color={
-                                  assignment.status === 'Completed' ? 'success' :
-                                  assignment.status === 'In Progress' ? 'warning' : 'info'
-                                }
-                                size="small"
-                              />
-                            </Box>
-                          </Box>
-                        }
-                      />
-                      <ListItemSecondaryAction>
-                        <Button
-                          variant="contained"
-                          onClick={() => handleOpenAssignment(assignment.id)}
-                          sx={{ minWidth: 100 }}
-                        >
-                          {assignment.status === 'Completed' ? 'Review' : 'Open'}
-                        </Button>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </React.Fragment>
-                ))}
-                {assignments.length === 0 && (
-                  <ListItem>
-                    <ListItemText
-                      primary="No assignments yet"
-                      secondary="New assignments will appear here when your healthcare provider assigns them."
-                    />
-                  </ListItem>
-                )}
-              </List>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Paper>
           </Grid>
         </Grid>

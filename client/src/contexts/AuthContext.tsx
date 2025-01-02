@@ -21,21 +21,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string) => {
+    console.log('Login attempt:', { email });
     try {
       // Mock authentication - replace with actual API call
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
       
+      // For testing purposes, create a mock patient user
       const mockUser: User = {
         id: '1',
         email,
-        role: 'doctor',
+        role: 'patient',
         firstName: 'John',
-        lastName: 'Smith'
+        lastName: 'Doe'
       };
+      console.log('Setting user:', mockUser);
       setUser(mockUser);
     } catch (error) {
+      console.error('Login error:', error);
       if (error instanceof Error) {
         throw new Error(`Authentication failed: ${error.message}`);
       }
@@ -44,16 +48,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    console.log('Logging out');
     try {
       // Mock logout - replace with actual API call
       setUser(null);
+      console.log('User logged out');
     } catch (error) {
+      console.error('Logout error:', error);
       if (error instanceof Error) {
         throw new Error(`Logout failed: ${error.message}`);
       }
       throw new Error('Logout failed');
     }
   };
+
+  console.log('Current auth state:', {
+    user,
+    isAuthenticated: user !== null
+  });
 
   return (
     <AuthContext.Provider value={{

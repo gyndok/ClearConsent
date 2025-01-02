@@ -22,6 +22,7 @@ import { PatientProfile } from './components/patient/profile/PatientProfile';
 import { PatientSettings } from './components/patient/settings/PatientSettings';
 import { PatientMessages } from './components/patient/messages/PatientMessages';
 import { PatientAssignment } from './components/patient/assignments/PatientAssignment';
+import { ProtectedRoute } from './components/shared/ProtectedRoute';
 
 const NavigationWrapper = () => {
   const location = useLocation();
@@ -30,6 +31,12 @@ const NavigationWrapper = () => {
     !location.pathname.includes('/login');
   const isPatientRoute = location.pathname.startsWith('/patient') &&
     !location.pathname.includes('/login');
+
+  console.log('Navigation state:', {
+    pathname: location.pathname,
+    isDoctorRoute,
+    isPatientRoute
+  });
 
   if (isDoctorRoute) return <DoctorNavbar />;
   if (isPatientRoute) return <PatientHeader />;
@@ -54,11 +61,31 @@ function App() {
             <Route path="/doctor/settings" element={<DoctorSettings />} />
             <Route path="/doctor/patients/:id" element={<PatientDetails />} />
             <Route path="/patient/login" element={<PatientLogin />} />
-            <Route path="/patient/dashboard" element={<PatientDashboard />} />
-            <Route path="/patient/profile" element={<PatientProfile />} />
-            <Route path="/patient/settings" element={<PatientSettings />} />
-            <Route path="/patient/messages" element={<PatientMessages />} />
-            <Route path="/patient/assignment/:id" element={<PatientAssignment />} />
+            <Route path="/patient/dashboard" element={
+              <ProtectedRoute role="patient">
+                <PatientDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/patient/profile" element={
+              <ProtectedRoute role="patient">
+                <PatientProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/patient/settings" element={
+              <ProtectedRoute role="patient">
+                <PatientSettings />
+              </ProtectedRoute>
+            } />
+            <Route path="/patient/messages" element={
+              <ProtectedRoute role="patient">
+                <PatientMessages />
+              </ProtectedRoute>
+            } />
+            <Route path="/patient/assignment/:assignmentId" element={
+              <ProtectedRoute role="patient">
+                <PatientAssignment />
+              </ProtectedRoute>
+            } />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

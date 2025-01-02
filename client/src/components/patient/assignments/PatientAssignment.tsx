@@ -1,387 +1,363 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
   Container,
-  Paper,
   Typography,
+  Paper,
   Button,
-  Stepper,
-  Step,
-  StepLabel,
-  CircularProgress,
-  Alert,
-  Divider,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Checkbox,
+  Stack,
+  Divider,
+  Chip,
+  CircularProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  RadioGroup,
+  Radio,
   FormControlLabel,
+  FormControl,
+  FormLabel,
+  Alert,
+  Snackbar,
 } from '@mui/material';
-import {
-  PlayArrow as PlayArrowIcon,
-  Description as DescriptionIcon,
-  Check as CheckIcon,
-} from '@mui/icons-material';
+import { ArrowBack, Send as SendIcon } from '@mui/icons-material';
+import SignatureCanvas from 'react-signature-canvas';
 import { PatientHeader } from '../shared/PatientHeader';
+import { VideoEmbed } from '../../shared/VideoEmbed';
+import { PdfViewer } from '../../shared/PdfViewer';
 
 interface Assignment {
   id: string;
   title: string;
   description: string;
-  type: 'video' | 'document' | 'consent';
   status: 'pending' | 'in_progress' | 'completed';
-  steps: {
+  steps: Array<{
     id: string;
     title: string;
-    type: 'video' | 'document' | 'consent';
+    type: 'video' | 'document';
     content: {
       url: string;
-      duration?: string;
-      fileType?: string;
     };
-    completed: boolean;
-  }[];
+  }>;
 }
 
 export const PatientAssignment: React.FC = () => {
-  const { assignmentId } = useParams<{ assignmentId: string }>();
   const navigate = useNavigate();
+  const { assignmentId } = useParams<{ assignmentId: string }>();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
-  const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [consent, setConsent] = useState(false);
+  const [signatureType, setSignatureType] = useState<'type' | 'draw'>('type');
+  const [typedSignature, setTypedSignature] = useState('');
+  const signatureRef = useRef<SignatureCanvas | null>(null);
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    const fetchAssignment = async () => {
-      setIsLoading(true);
-      setError(null);
-
+    const loadAssignment = async () => {
       try {
-        // Mock API call to fetch assignment
+        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
-
+        
         // Mock assignment data
         const mockAssignment: Assignment = {
-          id: '1',
-          title: 'Dental Cleaning Procedure',
-          description: 'Please review the following materials about your upcoming dental cleaning procedure.',
-          type: 'video',
-          status: 'in_progress',
+          id: assignmentId || '',
+          title: 'Dental Cleaning Consent Form',
+          description: 'Please review the following information about your upcoming dental cleaning procedure.',
+          status: 'pending',
           steps: [
             {
               id: '1',
-              title: 'Introduction Video',
+              title: 'Educational Video',
               type: 'video',
               content: {
-                url: 'https://example.com/video1.mp4',
-                duration: '5:30',
+                url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
               },
-              completed: true,
             },
             {
               id: '2',
-              title: 'Procedure Details',
+              title: 'Consent Form',
               type: 'document',
               content: {
-                url: 'https://example.com/document1.pdf',
-                fileType: 'PDF',
+                url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
               },
-              completed: false,
-            },
-            {
-              id: '3',
-              title: 'Consent Form',
-              type: 'consent',
-              content: {
-                url: 'https://example.com/consent1.pdf',
-                fileType: 'PDF',
-              },
-              completed: false,
             },
           ],
         };
-
         setAssignment(mockAssignment);
-        setActiveStep(mockAssignment.steps.findIndex(step => !step.completed));
-      } catch {
-        setError('Failed to load assignment. Please try again.');
+      } catch (error) {
+        console.error('Error loading assignment:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (assignmentId) {
-      fetchAssignment();
-    }
+    loadAssignment();
   }, [assignmentId]);
 
-  const handleNext = async () => {
-    if (!assignment) return;
-    
+  const handleSaveProgress = async () => {
     try {
-      // Mock API call to mark step as completed
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      setAssignment(prev => {
-        if (!prev) return null;
-        const updatedSteps = [...prev.steps];
-        updatedSteps[activeStep] = {
-          ...updatedSteps[activeStep],
-          completed: true,
-        };
-        return {
-          ...prev,
-          steps: updatedSteps,
-          status: updatedSteps.every(step => step.completed) ? 'completed' : 'in_progress',
-        };
-      });
-
-      if (activeStep < assignment.steps.length - 1) {
-        setActiveStep(activeStep + 1);
-      }
-    } catch {
-      setError('Failed to update progress. Please try again.');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setSuccessMessage('Progress saved successfully!');
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error saving progress:', error);
     }
   };
 
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+  const handleSubmit = async () => {
+    const hasSignature = signatureType === 'type' ? typedSignature : !signatureRef.current?.isEmpty();
+    if (!hasSignature) {
+      return;
+    }
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setSuccessMessage('Assignment submitted successfully!');
+      setShowSuccess(true);
+      setTimeout(() => {
+        navigate('/patient/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting assignment:', error);
+    }
   };
 
-  const renderStepContent = (step: Assignment['steps'][0]) => {
-    switch (step.type) {
-      case 'video':
-        return (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                {step.title}
-              </Typography>
-              <Box
-                sx={{
-                  position: 'relative',
-                  paddingBottom: '56.25%', // 16:9 aspect ratio
-                  height: 0,
-                  overflow: 'hidden',
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                }}
-              >
-                <Box
-                  component="iframe"
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 0,
-                  }}
-                  src={step.content.url}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                Duration: {step.content.duration}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                startIcon={<PlayArrowIcon />}
-                variant="contained"
-                onClick={handleNext}
-                disabled={step.completed}
-              >
-                {step.completed ? 'Completed' : 'Mark as Watched'}
-              </Button>
-            </CardActions>
-          </Card>
-        );
+  const handleSendQuestion = async () => {
+    if (!question.trim()) {
+      return;
+    }
 
-      case 'document':
-        return (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                {step.title}
-              </Typography>
-              <Box
-                sx={{
-                  height: 600,
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                }}
-              >
-                <Box
-                  component="iframe"
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    border: 0,
-                  }}
-                  src={step.content.url}
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                File Type: {step.content.fileType}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                startIcon={<DescriptionIcon />}
-                variant="contained"
-                onClick={handleNext}
-                disabled={step.completed}
-              >
-                {step.completed ? 'Completed' : 'Mark as Read'}
-              </Button>
-            </CardActions>
-          </Card>
-        );
-
-      case 'consent':
-        return (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                {step.title}
-              </Typography>
-              <Box
-                sx={{
-                  height: 400,
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                  mb: 2,
-                }}
-              >
-                <Box
-                  component="iframe"
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    border: 0,
-                  }}
-                  src={step.content.url}
-                />
-              </Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={consent}
-                    onChange={(e) => setConsent(e.target.checked)}
-                    disabled={step.completed}
-                  />
-                }
-                label="I have read and agree to the terms outlined in this consent form"
-              />
-            </CardContent>
-            <CardActions>
-              <Button
-                startIcon={<CheckIcon />}
-                variant="contained"
-                onClick={handleNext}
-                disabled={!consent || step.completed}
-              >
-                {step.completed ? 'Signed' : 'Sign Consent Form'}
-              </Button>
-            </CardActions>
-          </Card>
-        );
-
-      default:
-        return null;
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setQuestionDialogOpen(false);
+      setQuestion('');
+      setSuccessMessage('Question sent successfully!');
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error sending question:', error);
     }
   };
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress />
+      <Box>
+        <PatientHeader />
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+          <CircularProgress />
+        </Box>
       </Box>
     );
   }
 
   if (!assignment) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h6" color="error">
-          Assignment not found
-        </Typography>
+      <Box>
+        <PatientHeader />
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+          <Typography>Assignment not found</Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box>
       <PatientHeader />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Paper sx={{ p: 4 }}>
-          <Typography variant="h5" gutterBottom>
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Button
+                startIcon={<ArrowBack />}
+                onClick={() => navigate('/patient/dashboard')}
+              >
+                Back to Dashboard
+              </Button>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button
+                startIcon={<SendIcon />}
+                onClick={() => setQuestionDialogOpen(true)}
+                sx={{ mr: 2 }}
+              >
+                Ask a Question
+              </Button>
+              <Chip
+                label={assignment.status.replace('_', ' ').toUpperCase()}
+                color={
+                  assignment.status === 'completed' ? 'success' :
+                  assignment.status === 'in_progress' ? 'warning' : 'default'
+                }
+              />
+            </Stack>
+          </Box>
+
+          {/* Title & Description */}
+          <Typography variant="h4" gutterBottom>
             {assignment.title}
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
             {assignment.description}
           </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
+          <Divider sx={{ my: 4 }} />
 
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+          {/* Content Steps */}
+          <Grid container spacing={4}>
             {assignment.steps.map((step) => (
-              <Step key={step.id} completed={step.completed}>
-                <StepLabel>{step.title}</StepLabel>
-              </Step>
+              <Grid item xs={12} key={step.id}>
+                <Typography variant="h6" gutterBottom>
+                  {step.title}
+                </Typography>
+                {step.type === 'video' && (
+                  <Box sx={{ mt: 2 }}>
+                    <VideoEmbed url={step.content.url} />
+                  </Box>
+                )}
+                {step.type === 'document' && (
+                  <Box sx={{ mt: 2 }}>
+                    <PdfViewer url={step.content.url} />
+                  </Box>
+                )}
+              </Grid>
             ))}
-          </Stepper>
-
-          <Divider sx={{ mb: 4 }} />
-
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              {renderStepContent(assignment.steps[activeStep])}
-            </Grid>
           </Grid>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button
-              onClick={handleBack}
-              disabled={activeStep === 0}
-            >
-              Back
+          <Divider sx={{ my: 4 }} />
+
+          {/* Signature Section */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              Signature
+            </Typography>
+            <FormControl component="fieldset" sx={{ mb: 3 }}>
+              <FormLabel component="legend">Signature Method</FormLabel>
+              <RadioGroup
+                row
+                value={signatureType}
+                onChange={(e) => setSignatureType(e.target.value as 'type' | 'draw')}
+              >
+                <FormControlLabel
+                  value="type"
+                  control={<Radio />}
+                  label="Type Signature"
+                />
+                <FormControlLabel
+                  value="draw"
+                  control={<Radio />}
+                  label="Draw Signature"
+                />
+              </RadioGroup>
+            </FormControl>
+
+            {signatureType === 'type' ? (
+              <TextField
+                fullWidth
+                label="Type your full name"
+                value={typedSignature}
+                onChange={(e) => setTypedSignature(e.target.value)}
+                sx={{ maxWidth: 400 }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  p: 2,
+                  mb: 2,
+                }}
+              >
+                <SignatureCanvas
+                  ref={signatureRef}
+                  canvasProps={{
+                    width: 500,
+                    height: 200,
+                    style: { width: '100%', height: 200 },
+                  }}
+                />
+                <Button
+                  size="small"
+                  onClick={() => signatureRef.current?.clear()}
+                  sx={{ mt: 1 }}
+                >
+                  Clear Signature
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button variant="outlined" onClick={handleSaveProgress}>
+              Save Progress
             </Button>
             <Button
               variant="contained"
-              onClick={() => navigate('/patient/dashboard')}
-              disabled={!assignment.steps.every(step => step.completed)}
+              onClick={handleSubmit}
+              disabled={signatureType === 'type' ? !typedSignature : signatureRef.current?.isEmpty()}
             >
-              Complete Assignment
+              Submit
             </Button>
           </Box>
         </Paper>
       </Container>
+
+      {/* Question Dialog */}
+      <Dialog
+        open={questionDialogOpen}
+        onClose={() => setQuestionDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Ask a Question</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Type your question here..."
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setQuestionDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSendQuestion}
+            disabled={!question.trim()}
+          >
+            Send Question
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={6000}
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowSuccess(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }; 

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
   Container,
   Paper,
   Typography,
   TextField,
   Button,
   Alert,
-  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../../../contexts/AuthContext';
 
@@ -24,62 +24,68 @@ export const PatientLogin: React.FC = () => {
     setError(null);
     setIsLoading(true);
 
+    console.log('Attempting login with email:', email);
     try {
       await login(email, password);
+      console.log('Login successful, navigating to dashboard');
       navigate('/patient/dashboard');
-    } catch {
-      setError('Invalid email or password');
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An error occurred during login');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Patient Login
-        </Typography>
-        <Typography variant="subtitle1" align="center" sx={{ mb: 4 }}>
-          Access your patient portal
-        </Typography>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 8 }}>
+      <Container maxWidth="sm">
+        <Paper sx={{ p: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            Patient Login
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            sx={{ mb: 3 }}
-          />
-          <Button
-            fullWidth
-            variant="contained"
-            type="submit"
-            disabled={isLoading}
-            sx={{ mb: 2 }}
-          >
-            {isLoading ? <CircularProgress size={24} /> : 'Login'}
-          </Button>
-        </form>
-      </Paper>
-    </Container>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              margin="normal"
+              required
+            />
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              disabled={isLoading}
+              sx={{ mt: 3 }}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 }; 
